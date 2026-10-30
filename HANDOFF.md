@@ -8,9 +8,14 @@ M1–M3 are complete; M4–M10 remain unimplemented. Read [ROADMAP.md](ROADMAP.m
 
 ## GitHub checkpoint authorization
 
-After M3, the user explicitly authorized a new private repository at
+After M3, the user explicitly authorized and created a private repository at
 [ilancooke/agentic-dev-runner](https://github.com/ilancooke/agentic-dev-runner)
-and an initial M1–M3 checkpoint directly on main, including the preserved prototype.
+with initial M1–M3 checkpoint `31c1f1ce21fe8ef00bd39b4d55034fa920ac1c84`
+published directly on main, including the preserved prototype. GitHub's main ref
+was verified against the local commit. No separate branch/PR merge was needed.
+Origin uses HTTPS with existing GitHub CLI authentication; SSH authentication failed.
+Repository-local commit email is the account's GitHub no-reply address after GitHub
+rejected the original private email. No account privacy/permission settings changed.
 Use current Git status/log/remotes for the publication baseline. Earlier milestone
 evidence records the historical untracked, pre-publication state. Environments,
 credentials and environment-managed directories are excluded from this checkpoint.
@@ -76,9 +81,9 @@ deployment, reboot or production validation ran. No dependencies were installed.
 2. Read M4 deliverables/acceptance, architecture, STATE.md, discovery contract and
    previous evidence. Keep approved acceptance criteria unchanged.
 3. Use `.venv-dev/bin/python` and the documented runner suite. Do not run prototype
-   scripts or their operational connectivity/project tests. This unborn/no-remote
-   development checkout is intentionally not a valid full preflight/start fixture;
-   generated repositories have real local commits/cached default refs.
+   scripts or their operational connectivity/project tests. Use generated disposable
+   repositories with real local commits/cached default refs as preflight/start
+   fixtures; do not use this runner working checkout as an execution test fixture.
 4. Implement runner-provided constrained Python/Node execution, dependency/build/
    test isolation and supervised Codex adapter/capability checks in the package.
    Carry explicit intent/identity/configuration through the M3 layer. Add any schema
