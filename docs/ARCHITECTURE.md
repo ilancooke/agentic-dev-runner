@@ -2,7 +2,11 @@
 
 Approved during the architecture interview on 2026-10-30. M1 packaging/test harness,
 M2 read-only discovery and M3 approval/durable state are implemented; execution
-capabilities remain planned.
+capabilities are implemented as M4 library APIs. The user explicitly revised execution
+to the [trusted dedicated VM](TRUSTED_VM_DECISION.md), with no Codex sandbox. Earlier
+container work is preserved as history. Native M4 acceptance passed; M5–M10 remain
+unimplemented. No operational CLI/service or publication workflow is deployed.
+See [execution](EXECUTION.md) and [M4 evidence](evidence/M4-NATIVE.md).
 The roadmap defines deliverables and evidence required before claiming any
 capability is implemented. See [M1 evidence](evidence/M1.md) and
 [M2 evidence](evidence/M2.md) and [M3 evidence](evidence/M3.md).
@@ -23,10 +27,10 @@ or multi-agent framework is planned.
 | Small Python package and one CLI, minimal dependencies | Maintainability and low overhead. Add abstractions only for demonstrated complexity. |
 | One global policy configuration, no per-project runner config | Discover project details from repository evidence. Stop on consequential ambiguity. |
 | Execute in the supplied checkout | Sole human operator does not plan manual edits. Require clean new starts, ownership checks for recovery and canonical repository locks. Revisit if concurrent human work becomes normal. |
-| Runner-provided container environments | Reproducible tools and enforced access boundaries. Install declared project dependencies inside them. Do not automatically execute arbitrary project Dockerfiles as setup. |
+| Direct execution on the dedicated development VM | Only owner-selected trusted projects; user accepts native dependencies/builds/tests, GitHub commands and host Docker authority. Codex sandboxing is disabled; the VM is the boundary. |
 | Deterministic roadmap selection and transitions | Recovery must not depend on model interpretation of ordering or progress. Codex interprets free-form requirements and produces acceptance evidence. |
 | start authorizes the current committed roadmap | Avoid repetitive milestone approvals. Record approved revision and referenced scope; scope/acceptance changes require renewed authorization. |
-| GPT-6.1-Sol, high reasoning effort | Explicit user choice. No automatic model or effort downgrade, paid fallback, or consent to downgrade prompts. Verify exact CLI identifiers during implementation. |
+| GPT-6.1-Sol, high reasoning effort | Explicit user choice. No automatic model or effort downgrade, paid fallback, or consent to downgrade prompts. Native M4 verified `gpt-6.1-sol` and high in both actual fresh/resumed turn contexts. |
 | Fresh session per milestone | Reconstruct context from project documents. Resume interrupted work within the same milestone by explicit session ID where appropriate; otherwise use a fresh session and durable evidence. |
 | Two automatic CI repair attempts per milestone | Recover ordinary failures without human interruption; preserve approved scope and persist the budget across restarts. |
 | Automatic default-branch reconciliation | Preserve history without force-pushing; resolve within approved scope, then repeat verification. Bounded attempts; ambiguous conflicts pause. |
@@ -61,9 +65,10 @@ container execution, Codex, verification, Git/GitHub and scheduling. Exact filen
 are implementation details, not a required abstraction hierarchy.
 
 The trusted orchestrator controls publication. Codex, dependency installation,
-build scripts and tests run inside constrained environments. Verification uses a
-fresh environment and records the exact proposed tree. Publication must not execute
-repository hooks, filters or configuration-controlled commands outside isolation.
+build scripts and tests run natively as the trusted VM development account. Project
+containers are used when appropriate to the application. Verification uses a fresh
+project-appropriate environment and records the exact proposed tree. Publication
+still needs explicit controlled staging/checks and must avoid implicit hooks/filters.
 
 The workflow is discovery/authorization, implementation/recovery, verification,
 commit, push/PR, applicable CI, merge, synchronization/completion, then the next
@@ -78,27 +83,26 @@ after active execution finishes. Test roots and operational roots must never mix
 
 ## Security and approval boundaries
 
-- Containers must not receive GitHub credentials, operational state, production
-  credentials, unrelated repositories, privileged host access or the Docker socket.
-- Codex retains sandboxing inside its execution container. Verify compatibility,
-  authentication handling and resumed-session permissions against installed tools.
-- Project code must not inherit orchestrator secrets through independent tests,
-  dependency lifecycle scripts, Git hooks or credential/configuration mechanisms.
-- Restrict network access, including production cloud and homelab endpoints.
-  Distinguish necessary dependency retrieval from live integrations and paid calls.
-- start authorizes the configured Codex usage and ordinary publication/verification
-  workflow. Additional external spending, production deployments and destructive
-  operations remain explicit gates. Do not alter credentials or GitHub permissions
-  without approval. Approvals must be scoped and recorded, not general escalation.
-- Treat container-launching tests as a special capability. Implement a constrained
-  solution or diagnose unsupported execution; never grant unrestricted daemon access.
-- Redact secrets and sensitive payloads from logs. Record diagnostic identifiers,
-  available token usage, attempt counts, state and next action.
+The [accepted trusted-VM revision](TRUSTED_VM_DECISION.md) supersedes the original
+nested-container isolation requirement. One owner selects trusted projects; no
+other human operates the VM. Codex runs directly with sandboxing and per-command
+approval prompts disabled, using the development account's VM permissions.
 
-Container and credential architecture must pass boundary tests before being called
-secure. Do not substitute prompt prohibitions for enforced restrictions. If installed
-Codex exec cannot supply necessary supported controls/signals, evaluate app-server;
-do not claim unverified behavior or disable security to achieve automation.
+- Existing development-account GitHub/Codex auth and host Docker use are authorized.
+  Account files may be readable to trusted project code; no hostile-code secret
+  isolation is promised. Arbitrary inherited token/cloud variables are omitted.
+- Native dependencies/build/test scripts may execute. Discovery remains read-only.
+  Application containers receive only project-specific inputs, without a mounted
+  unrestricted Docker socket. Host Docker authority is an accepted powerful capability.
+- Preserve scope approval, canonical locks, durable intent, bounded supervision,
+  model/effort selection, exact-session resume and private/redacted diagnostics.
+- Reference checkout and existing operational runner state remain excluded from
+  testing. Use live owned generated fixtures; do not adopt arbitrary directories.
+- Production deployment, new spending, destructive cleanup, credential/GitHub
+  permission changes, blanket root access and persistent services remain separate
+  gates. Standing permission for necessary disposable testing persists.
+- Read current execution policy before effects. Earlier container/native-sandbox
+  approvals are not upgraded silently. Reports do not authorize publication.
 
 ## Service behavior
 

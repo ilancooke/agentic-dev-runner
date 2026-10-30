@@ -26,6 +26,7 @@ class RunnerPolicy:
     reasoning_effort: str = "high"
     max_ci_repairs: int = 2
     global_concurrency: int = 1
+    execution: dict | None = None
 
     def as_dict(self):
         data = asdict(self)
@@ -33,7 +34,24 @@ class RunnerPolicy:
             raise StateError("approval.policy", "Model/effort downgrades are not authorized; verify CLI representation in M4.", "policy")
         if type(self.max_ci_repairs) is not int or self.max_ci_repairs != 2 or type(self.global_concurrency) is not int or self.global_concurrency < 1:
             raise StateError("approval.policy", "Use the approved repair budget and a positive integer global concurrency.", "policy")
-        return {"version": 1, **data}
+        if self.execution is None:
+            data.pop("execution")
+            return {"version": 1, **data}
+        # Policy v2 is explicit opt-in. Existing M3 policy v1 bytes/hashes do not change.
+        from .execution import ContainerPolicy
+        from .native_execution import NativePolicy
+        try:
+            execution = self.execution
+            if not isinstance(execution, dict) or type(execution.get("version")) is not int:
+                raise ValueError()
+            native = execution.get("mode") == "trusted-vm"
+            validated = (NativePolicy(**{k: execution[k] for k in ("home", "codex_home", "timeout", "output_limit", "codex_binary", "codex_sha256", "codex_sandbox")}).record() if native
+                         else ContainerPolicy(**{k: execution[k] for k in ("image", "timeout", "memory_mb", "cpus", "pids")}).record())
+            if execution != validated:
+                raise ValueError()
+        except (KeyError, TypeError, ValueError) as exc:
+            raise StateError("approval.policy", "Invalid execution policy v2; review the exact pinned boundary before approval.", "policy") from exc
+        return {"version": (4 if execution["codex_sandbox"] == "disabled" else 3) if native else 2, **data}
 
 
 def evidence_path(path):

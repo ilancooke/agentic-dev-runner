@@ -3,7 +3,8 @@
 Approved architecture and implementation plan, 2026-10-30. See
 [architecture](docs/ARCHITECTURE.md) and [session handoff](HANDOFF.md).
 Implement one milestone per fresh session. Do not advance without recording
-acceptance evidence. M1–M3 are complete; M4–M10 remain unimplemented. See
+acceptance evidence. M1–M4 are complete under the accepted trusted-VM design;
+M5–M10 remain unimplemented. See [M4 acceptance evidence](docs/evidence/M4-NATIVE.md),
 [M1 acceptance evidence](docs/evidence/M1.md), [M2 evidence](docs/evidence/M2.md),
 and [M3 evidence](docs/evidence/M3.md).
 
@@ -20,7 +21,7 @@ as an execution input; use the new package for read-only parsing/discovery.
 | M1 | complete |
 | M2 | complete |
 | M3 | complete |
-| M4 | not started |
+| M4 | complete |
 | M5 | not started |
 | M6 | not started |
 | M7 | not started |
@@ -97,33 +98,45 @@ Phase: Generalization and architecture. Depends on M2.
 - Scope changes invalidate authorization; permitted progress changes do not.
 - No undocumented boolean combination can advance publication state.
 
-## M4 — Container execution and Codex adapter
+## M4 — Native VM execution and Codex adapter
 
 Phase: Generalization and architecture. Depends on M3.
+Revised with explicit user agreement to the [trusted dedicated-VM design](docs/TRUSTED_VM_DECISION.md).
+The [original container scope](docs/evidence/M4-ORIGINAL-SCOPE.md) is retained as history.
 
 ### Deliverables
 
-- Runner-provided Python and Node/browser execution environments, constrained
-  mounts/networking, dependency setup, and subprocess lifecycle supervision.
-- Codex adapter using explicit model and reasoning selection, structured events,
-  reports, session identity, available diagnostics, and capability checks.
-- Enforced separation of project execution from GitHub credentials, operational
-  state, production access, unrelated files and Docker control.
+- Supervised native execution as the development account for trusted, owner-selected
+  Python/Node projects: project dependency environments, builds and tests.
+- Codex adapter with sandboxing explicitly disabled under the trusted-VM policy,
+  explicit GPT-6.1-Sol/high,
+  structured events/reports, session identity and installed capability checks.
+- Support Docker-based project builds/tests through the VM's Docker engine;
+  application containers do not require Codex to run inside a container.
+- Explicitly versioned approval of execution/auth/network settings, bounded process
+  lifecycle, private diagnostics and documented trusted-code limitations.
 
 ### Acceptance criteria
 
-- An explicitly authorized disposable real Codex check demonstrates the requested
-  GPT-6.1-Sol/high settings and sandbox compatibility inside the container.
-- Automated boundary tests demonstrate denied access to protected host files,
-  credentials, state, Docker socket and prohibited network destinations.
-- Dependencies, builds and tests run inside the execution boundary as well as
-  agent-generated commands. Host project hooks/scripts are not implicitly run.
-- Direct-checkout permissions work without broad host mounts or privileged
-  containers. Git metadata is protected from unauthorized agent mutation.
-- Unsupported security capabilities fail closed; no downgrade or automatic
-  approval of a downgrade prompt exists.
-- Authentication exposure and session-resume permission behavior are verified,
-  not inferred from the sandbox name. Log redaction is tested.
+- An authorized disposable native Codex check demonstrates exact `gpt-6.1-sol`/high
+  settings, actual VM-user commands and exact-session resume with sandboxing disabled
+  and the same settings reasserted.
+- Automated tests exercise Python/Node dependency/build/test execution, timeout,
+  cancellation, bounded output, partial-work retention and pending-operation recovery.
+- Live disposable-root guards reject reference, operational-state and unowned test
+  targets before native process launch. Discovery remains read-only/non-executing.
+- Fresh and resumed Codex commands demonstrate the agreed VM-user access without
+  an additional agent sandbox. The model and reasoning effort cannot downgrade.
+  Test probes write only inside generated disposable fixtures.
+- Existing development-account authentication and Docker authority are documented
+  accurately and checked with fake credentials in automated tests. Arbitrary
+  inherited secrets are omitted; raw tool/model output is excluded from public logs.
+- A disposable Docker application build/run/test works from the host when Docker
+  is available. No Docker socket is injected into application containers.
+- Approved configuration and intent precede effects. Uncertain/interrupted execution
+  retains identity and partial work; reports do not authorize publication/completion.
+- No production deployment, credential/permission change, blanket root access,
+  persistent service or publication of this runner is implied by development execution.
 
 ## M5 — Verification and controlled publication
 
@@ -131,7 +144,7 @@ Phase: Reliability, recovery, verification and security. Depends on M4.
 
 ### Deliverables
 
-- Fresh-container verification tied to an identified proposed Git tree.
+- Fresh verification environments appropriate to the project, tied to an identified proposed Git tree.
 - Controlled staging, commit, push, PR creation and GitHub gate discovery.
 - Verification policy: configured CI is mandatory; absent CI allows local-only
   verification; missing or ambiguous verification requirements stop execution.

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "date": "2026-10-30",
+  "command": ".venv-dev/bin/python -m tests.support.probe_native_m4 --real-codex --docker",
+  "session_id": "01a18ee0-3a61-75d3-913f-8ff015bc67ad",
+  "cli": "0.166.0",
+  "binary_sha256": "b8a11fedf24b2dfb59a70c9e52b030f9a508dcd49cd2dd0d41956f4c785156b8",
+  "observed_turn_contexts": [
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "approval_policy": "never",
+      "sandbox_policy": {
+        "type": "danger-full-access"
+      }
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "approval_policy": "never",
+      "sandbox_policy": {
+        "type": "danger-full-access"
+      }
+    }
+  ],
+  "checks": {
+    "fresh_command": true,
+    "explicit_id_resume": true,
+    "vm_user_writes_in_owned_fixture": true,
+    "fake_auth_readable_as_accepted": true,
+    "raw_auth_not_logged": true,
+    "docker_build_run_test": true,
+    "docker_socket_not_mounted": true,
+    "pending": null,
+    "phase": "implementing",
+    "revision": 34
+  },
+  "usage": {
+    "fresh": {
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 14080,
+      "input_tokens": 28495,
+      "output_tokens": 118,
+      "reasoning_output_tokens": 0
+    },
+    "resumed": {
+      "cache_write_input_tokens": 0,
+      "cached_input_tokens": 42496,
+      "input_tokens": 57397,
+      "output_tokens": 224,
+      "reasoning_output_tokens": 0
+    }
+  },
+  "usage_note": "CLI-reported values retained as provided; resumed usage may be cumulative. No billing or aggregate usage inference.",
+  "cleanup": "Generated repository/state removed by live DisposableRoot lifecycle; uniquely labeled generated Docker image removed; normal Codex session history retained under development account.",
+  "publication": "none"
+}

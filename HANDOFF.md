@@ -1,134 +1,127 @@
-# M3 complete — stop here; next fresh session implements M4 only
+# M4 complete — stop here; next milestone is M5
 
-The approved architecture/ten-milestone roadmap was accepted on 2026-10-30.
-M1–M3 are complete; M4–M10 remain unimplemented. Read [ROADMAP.md](ROADMAP.md),
-[architecture](docs/ARCHITECTURE.md), [M3 evidence](docs/evidence/M3.md),
-[the state/approval contract](docs/STATE.md), and
-[the discovery contract](docs/DISCOVERY.md).
+M1–M4 are complete. M5–M10 remain unimplemented. Do not begin M5 in this session.
+The user explicitly chose **NO Codex sandbox**; the dedicated development VM is
+its boundary. Read [ROADMAP.md](ROADMAP.md), [the accepted decision](docs/TRUSTED_VM_DECISION.md),
+[execution](docs/EXECUTION.md), [M4 evidence](docs/evidence/M4-NATIVE.md),
+[state](docs/STATE.md), [testing](docs/TESTING.md), architecture and discovery.
 
-## GitHub checkpoint authorization
+## Purpose and agreed authority
 
-After M3, the user explicitly authorized and created a private repository at
-[ilancooke/agentic-dev-runner](https://github.com/ilancooke/agentic-dev-runner)
-with initial M1–M3 checkpoint `31c1f1ce21fe8ef00bd39b4d55034fa920ac1c84`
-published directly on main, including the preserved prototype. GitHub's main ref
-was verified against the local commit. No separate branch/PR merge was needed.
-Origin uses HTTPS with existing GitHub CLI authentication; SSH authentication failed.
-Repository-local commit email is the account's GitHub no-reply address after GitHub
-rejected the original private email. No account privacy/permission settings changed.
-Use current Git status/log/remotes for the publication baseline. Earlier milestone
-evidence records the historical untracked, pre-publication state. Environments,
-credentials and environment-managed directories are excluded from this checkpoint.
+Automate the user's existing workflow after interactive Q&A and roadmap approval:
+a fresh Codex session implements the next milestone, then tests, controlled GitHub
+publication/CI/merge, handoff and the next session. Durable state preserves partial
+work and recovery. Only the user's own trusted projects run on this dedicated VM;
+no other human operates it. They accept native dependency/build/test commands,
+GitHub commands and host Docker authority. Codex runs as the development user with
+sandboxing and per-command approval prompts disabled. No custom sandbox profiles,
+containerized agent or VM migration is required.
+
+Standing authorization covers required disposable testing. Do not repeatedly ask
+for the same permission. Tool-session permissions are external to package launch
+settings. Production deployment, new spending, credential/GitHub permission changes,
+blanket sudo, persistent services and publishing this runner remain separate gates.
+Current runner code has not been committed, pushed, merged or deployed.
+
+## Approval friction encountered during M4
+
+Development was repeatedly interrupted by tool-level approval requests for Docker
+and native test commands. The user explicitly granted standing permission for
+whatever M4 testing was needed, then had to object again because prompts continued.
+Attempts to consolidate commands and request reusable approval rules did not reliably
+eliminate the prompts; some approval waits were interrupted. Repeatedly submitting
+approval-triggering commands after that clarification created unnecessary friction
+and undermined the intended unattended workflow.
+
+Future sessions must preserve existing authorization and avoid asking again for
+already-covered tests. Distinguish the current coding tool's externally managed
+permissions from the package's Codex launch settings: disabling sandboxing/prompts
+in the package does not reconfigure the tool session running development. If that
+session still requires approval, explain the specific constraint rather than
+suggesting the user has not authorized the work. Use existing permitted execution
+paths and consolidate checks where appropriate, without bypassing enforced controls.
+The package's fresh/resumed sessions now explicitly use full VM-user access and
+approval policy never. Committed-scope approval and the separate gates above remain.
 
 ## Current implementation
 
-- `src/agentic_runner` is a conventional package. The installed `agentic-runner`
-  CLI (also `python -m agentic_runner`) still provides help/version and read-only
-  `discover <checkout>` JSON only. No operational execution command was added.
-- M3's `open_store()`/`start_run()` library API records explicit authorization of
-  committed scope and configuration. It does not launch an agent, create a real
-  branch or publish. Read STATE.md before using/extending it.
-- State v1 has private versioned namespace/project bindings, canonical common-Git
-  directory inode locks, strict run/intent schemas, append-only authoritative
-  events and atomic snapshots. Stale revisions and uncertain writes cannot be
-  retried blindly. Complete journal events recover lagging snapshots; torn or
-  incompatible history diagnoses without truncation.
-- Approval retains committed roadmap/requirement/asset bytes and blob IDs. Only
-  progress status values and narrowly defined unreferenced evidence are exempt.
-  AGENTS files, acceptance text, referenced evidence, runtime/check declarations
-  and execution configuration stay protected. Scope changes durably invalidate
-  approval; explicit renewal retains previous approvals in history.
-- M3 phases are approved, implementing, verification_pending, paused,
-  approval_required and failed. Publication/completion phases and commit/push/merge
-  intents are unavailable until later verified gates/schema evolution. Resolving
-  an intent never advances phase. Reports/booleans cannot authorize publication.
-- `.venv-dev` remains the separate Python 3.12.3 runner environment; stdlib-only
-  runtime/tests. Existing `.venv` and all prototype files remain preserved.
-- Tests use live M1 DisposableRoot capabilities and generated local Git fixtures,
-  fake external adapters and private test state. Read [TESTING.md](docs/TESTING.md).
-  Never use an operational namespace to work around a test guard.
+- Conventional `src/agentic_runner` package; CLI still provides help/version and
+  read-only discovery. Operational start/status/pause/resume/service wiring is M9.
+- M3 approval, canonical locks, pending intent, append-only events and atomic state
+  are retained. Policy v4 / execution v2 explicitly records native no-sandbox mode,
+  account homes, pinned Codex binary/hash and process limits. Old policy versions
+  remain readable without automatic upgrade. Run/event/snapshot schemas stay v1;
+  publication/completion states and boolean gates remain unavailable.
+- `NativeExecutor` executes literal argv as the non-root owner after scope/config/
+  revision checks and durable intent. It supervises time/input/output/process groups,
+  preserves uncertain intent/partial work and omits raw output from public events.
+- `NativeCodexAdapter` checks pinned CLI 0.166.0 capabilities and exact requested
+  model/high. Fresh/exact-ID resume use `--dangerously-bypass-approvals-and-sandbox`,
+  `danger-full-access`, approval policy never, structured reports and recorded session
+  identity/available usage. Foreign resume IDs and bad reports fail; no automatic
+  retry, smaller model, lower effort or paid provider fallback.
+- Python/Node dependencies, builds and tests run natively. Dockerized applications
+  use the VM's Docker engine, without mounting its socket into application containers.
+  Required runtimes must be on the documented PATH; the Node test provisioned its
+  own temporary runtime, not a global host installation.
+- Original container adapter/images/tests/diagnosis are preserved as historical/
+  optional work. Their seven nested-container checks are not current M4 prerequisites.
 
-## Verification and preservation
+## Actual final checks
 
 ```bash
 .venv-dev/bin/python -m unittest discover -s tests -v
-# 84 tests passed (50 M1–M2 checks plus 34 M3 methods).
-.venv-dev/bin/python -m pip check
-# No broken requirements found.
+# 123 total: 115 passed, 8 skipped; 25.017 seconds.
+# Skips: 7 historical container checks + optional cached-Node fixture.
+
+.venv-dev/bin/python -m tests.support.run_native_m4_checks --cached-node
+# 123 total: 116 passed, 7 historical container checks skipped; 27.376 seconds.
+
+.venv-dev/bin/python -m tests.support.probe_native_m4 --real-codex --docker
+# Passed: actual fresh task, same-session resume, host Docker app build/run/test.
 ```
 
-Tests include nine deterministic error checkpoints and nine actual disposable
-child exits without Python cleanup, partial journal/snapshot writes, interrupted
-initialization, lost intent responses, stale controls, sync ordering, identity/
-role conflicts, process/alias/worktree locks, scope invalidation and renewal.
-This is local process/filesystem evidence, not host power-loss/container validation.
-An initial state-test fixture placed a link inside the reserved Verification block;
-the fixture was corrected and subsequent state/full suites passed. All actual
-commands/results and limitations are in the M3 evidence.
+The real session is `01a18ee0-3a61-75d3-913f-8ff015bc67ad`. Its two actual turn_context
+records both show `gpt-6.1-sol`, effort high, approval never and danger-full-access.
+Safe settings/usage/outcomes are retained in [JSON evidence](docs/evidence/m4-native-real-check.json).
+Normal Codex history remains private in the account; no tokens or raw model output
+were published. The task wrote only generated fixture files and preserved implementing
+phase/no pending intent. No model prose was treated as publication evidence.
 
-AST/whitespace checks passed for 28 Python sources; dependencies remain empty.
-The M1 SHA-256 manifest comparison again confirmed 11 prototype artifacts and 103
-reference files unchanged, with no reference inventory additions/removals. Its
-reference venv/cache exclusions remain explicit. Operational state contents were
-not read/written or used as a fixture. No real Codex, GitHub, Docker, AWS, service,
-deployment, reboot or production validation ran. No dependencies were installed.
+Native Python venv/build/install/pip-check/unittest and native Node npm-ci/install
+lifecycle/build/test passed. The Node binary came from the cached pinned official
+Node image copied into a disposable fixture; that temporary container and tools were
+removed. The generated Docker application image was removed after checking its exact
+label; no socket was mounted in the application. No shared image prune ran.
 
-## Next fresh session: M4 only
+All 43 Python sources parse with clean whitespace. `pip check` reports no broken
+requirements; runtime dependencies remain empty. M1 preservation check confirmed
+11 prototype and 103 reference files unchanged under existing cache/venv exclusions.
+No operational state was read/written or used as a fixture. No host service,
+credential/permission change or production deployment occurred.
 
-1. Inspect Git status/log/remotes and applicable instructions. Initial M1–M3 checkpoint
-   publication was explicitly authorized after M3; preserve any subsequent local work.
-   Do not include credentials, environments or unrelated files in future commits.
-2. Read M4 deliverables/acceptance, architecture, STATE.md, discovery contract and
-   previous evidence. Keep approved acceptance criteria unchanged.
-3. Use `.venv-dev/bin/python` and the documented runner suite. Do not run prototype
-   scripts or their operational connectivity/project tests. Use generated disposable
-   repositories with real local commits/cached default refs as preflight/start
-   fixtures; do not use this runner working checkout as an execution test fixture.
-4. Implement runner-provided constrained Python/Node execution, dependency/build/
-   test isolation and supervised Codex adapter/capability checks in the package.
-   Carry explicit intent/identity/configuration through the M3 layer. Add any schema
-   evolution deliberately; v1 rejects unknown fields/phases rather than migrating.
-5. Prepare disposable boundary tests and a concrete real Codex capability probe.
-   The M4 real Codex check requires explicit authorization per the roadmap; obtain
-   it after making the exact disposable probe/settings reviewable if it is not
-   already authorized. Verify GPT-6.1-Sol/high CLI identifiers and sandbox behavior
-   from installed capabilities, not the old observed CLI version or assumptions.
-6. Record commands, acceptance evidence, limitations and next recovery instructions,
-   update progress/handoff and stop without beginning M5.
+## Git, recovery and next fresh session
 
-No interrupted operational run needs recovery: M3 wrote only disposable test state,
-removed with owned fixtures. No runner state namespace was deployed. For an M3 test
-namespace with uncertain persistence, close/reopen via open_store; inspect its exact
-revision/pending ID before acting. Complete history can rebuild a missing/lagging
-snapshot. Torn/incompatible history requires preserved evidence and reviewed offline
-repair/migration; no automatic repair/truncation command exists.
+Baseline remains main at `685884d8092745a679a763f9b62e0f3c0f096ded`.
+All M4 work is unstaged/uncommitted. Preserve it and inspect status/instructions
+before further work. No applicable AGENTS.md was found. Do not execute root-level
+prototype scripts. Earlier M1–M3 GitHub publication was separately authorized and
+is not permission to publish this milestone.
 
-## Boundaries and remaining limits
+Next implementation session: **M5 only**, when requested. Read its full deliverables/
+acceptance, state protocol and M4 evidence first. It must introduce verified tree
+identity, controlled Git/GitHub publication and gate discovery deliberately. Configured
+CI cannot fall back to local-only checks. M4 added no publication capability; fresh
+project-appropriate verification environment wording reflects the accepted VM design.
 
-- `/home/ilan/agentic-workspaces/milestone-test` stays the read-only known-good
-  reference. `/home/ilan/agentic-runner-data` is existing operational state, never
-  test storage. Prototype scripts/config/schema/skill are preserved and unsafe to
-  invoke for development. No legacy state is imported.
-- Generate separate disposable repositories/state. Enforce live owned roots before
-  mutation, including aliases/symlinks. Never adopt arbitrary existing test roots.
-  No production repositories, AWS infrastructure, credentials or GitHub permissions
-  may change without explicit authorization.
-- Do not install/enable a persistent service without separate deployment approval.
-  Do not disable sandboxing or mount an unrestricted Docker socket into agent or
-  project execution containers. M4 must enforce credential/file/network boundaries,
-  including dependency/build/test execution, not just prompt restrictions.
-- Requested model remains GPT-6.1-Sol with high reasoning effort. M3 records the
-  requested label only; exact CLI representation remains unverified. No smaller
-  model, lower effort, paid fallback or automatic downgrade consent.
-- M3 locks coordinate trusted Linux/POSIX processes; they do not sandbox hostile
-  code or stop administrators replacing filesystem paths. Hash chains are corruption
-  checks, not signatures. No host reboot/storage power-loss test occurred.
-- Approval conservatively refuses uncaptured external links/assets. Ancestor AGENTS
-  bytes are separate uncommitted attestations. Natural-language consistency still
-  requires review; structured declarations/hashes alone do not prove acceptance.
-  Renewal currently requires clean default-branch committed scope for the same
-  run/milestone. CI files remain inventory only; M5 must interpret required gates.
-- No automatic history repair/migration/archival or completed-run advancement exists.
-  Journal/event/approval size limits stop safely. Execution, verified publication,
-  external-effect reconciliation, scheduling and service operations remain future
-  milestones. Implement one milestone per fresh session, record evidence, then stop.
+For uncertain execution, reopen failed state handles, inspect exact revision,
+pending operation, surviving processes/files and known session, then explicitly
+reconcile with evidence. Never blindly reissue a model request or truncate history.
+Process-group supervision does not clean arbitrary detached services automatically.
+Automatic retry/session recovery/scheduling and persistent service operation remain
+later milestones. Old policy approvals are not migrated silently.
+
+`/home/ilan/agentic-workspaces/milestone-test` stays read-only.
+`/home/ilan/agentic-runner-data` stays operational state, never development storage.
+All future tests use live owned generated fixtures. Keep real account integration
+selective and explicit; default tests must not consume credentials or model usage.

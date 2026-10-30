@@ -73,10 +73,13 @@ def validate_state(state, project):
     exact(approval["repository"], {"id", "root", "git_dir", "common_dir", "head", "branch", "remote", "default_branch", "default_branch_oid", "default_branch_source"})
     exact(approval["configuration"], {"policy", "runtime", "verification"})
     policy = approval["configuration"]["policy"]
-    exact(policy, {"version", "requested_model", "reasoning_effort", "max_ci_repairs", "global_concurrency"})
-    if type(policy["version"]) is not int or policy["version"] != 1:
+    if not isinstance(policy, dict) or type(policy.get("version")) is not int or policy["version"] not in {1, 2, 3, 4}:
         fail("Unsupported policy schema.")
-    RunnerPolicy(**{k: v for k, v in policy.items() if k != "version"}).as_dict()
+    exact(policy, {"version", "requested_model", "reasoning_effort", "max_ci_repairs", "global_concurrency"} | ({"execution"} if policy["version"] in {2, 3, 4} else set()))
+    if policy["version"] in {2, 3, 4} and not isinstance(policy["execution"], dict):
+        fail("Execution policies require an explicit execution configuration.")
+    if RunnerPolicy(**{k: v for k, v in policy.items() if k != "version"}).as_dict() != policy:
+        fail("Execution policy discriminator/version mismatch; no implicit migration.")
     exact(approval["configuration"]["runtime"], {"family", "version_line", "baseline_version", "constraints", "selection_source", "package_manager"})
     commands = approval["configuration"]["verification"]
     if not isinstance(commands, list) or not commands:

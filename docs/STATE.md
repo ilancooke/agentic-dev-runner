@@ -1,4 +1,18 @@
-# Approval and durable state contract (M3)
+# Approval and durable state contract (M3, M4 policy extension)
+
+## Current M4 execution-policy revision
+
+The user explicitly requested **no Codex sandbox**, with the dedicated trusted VM
+as the boundary. Native execution now requires policy v4 / execution-record v2,
+recording `codex_sandbox: disabled`, account homes, binary hash and process limits.
+Fresh and resumed launches use `--dangerously-bypass-approvals-and-sandbox` with
+approval policy never. Policy v1 (control), v2 (container) and v3 (earlier sandboxed
+native prototype) remain readable and cannot silently authorize v4 execution.
+Changing policies requires explicit renewed committed authorization. Run, snapshot,
+approval, identity and event schemas remain v1; no publication phases were added.
+The older M3/container-specific descriptions below retain their historical context;
+see [current execution](EXECUTION.md) and [the accepted decision](TRUSTED_VM_DECISION.md).
+
 
 M3 supplies a library control/persistence layer. The installed CLI still offers
 help, version and read-only discovery. `start_run()` below records explicit start
@@ -121,10 +135,36 @@ needs an explicit future policy. Unstructured instruction prose remains human/ag
 review context and is hashed, not semantically reconciled by this scanner.
 
 Execution configuration is captured alongside the scope: versioned global policy,
-requested GPT-6.1-Sol/high setting, repair budget (2), concurrency, discovered runtime
-and literal verification declarations. The setting is a **requested model label**;
-M4 must verify its exact CLI representation and container capabilities. There is
-no downgrade or fallback. Changes to configuration invalidate approval.
+requested GPT-6.1-Sol/high, repair budget (2), concurrency, discovered runtime and
+literal verification declarations. Native M4 verified CLI `gpt-6.1-sol` and high in
+real fresh/resumed turn contexts. Configuration changes invalidate authorization.
+
+M4 keeps namespace, identity, approval, event, snapshot and run schemas at v1.
+Publication/completion phases and new root boolean gates were not added.
+Execution policy versions are validated explicitly:
+
+| Policy | Meaning |
+| --- | --- |
+| v1 | Original M3 control/scope approval; no execution authority. |
+| v2 | Preserved container adapter, pinned image and constrained boundary. |
+| v3 | Earlier sandboxed-native prototype, readable but not launchable by the current native adapter. |
+| v4 | Current trusted-VM native execution with sandbox disabled, explicit homes/binary hash/process limits (execution record v2). |
+
+Native callers explicitly supply
+`RunnerPolicy(execution=NativePolicy(home=..., codex_home=...).record())` when opening
+a store. Existing approvals are not upgraded. Changing versions/settings invalidates
+the old scope/configuration authorization and requires explicit committed renewal.
+Old readers reject versions they do not know. No automatic namespace/history
+migration is implemented. Default M3 control APIs still emit policy v1.
+
+Native commands use existing implement/verify intents. Details record execution
+version 2, mode, exact policy, command/input hashes and safe adapter metadata before
+launch. Codex validation retains confirmed session ID/model/effort/available usage
+and a report hash, while omitting prompts, summaries and raw stdout/stderr from
+public events. Private process diagnostics are attached to native Codex exceptions.
+A completed command/report never changes phase or grants publication authority.
+Interrupted/uncertain execution retains its original pending ID until explicitly
+reconciled. See [EXECUTION.md](EXECUTION.md) for recovery and limits.
 
 `check_authorization(revision)` compares current scope/configuration, repository,
 checkout, remote/default branch and ancestry of the approved commit. Failure

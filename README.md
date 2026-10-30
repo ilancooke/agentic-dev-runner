@@ -1,8 +1,12 @@
 # Agentic development runner
 
-M1–M3 provide a Python package, read-only discovery, approval records, durable run
-state and an isolated test harness. Execution is not implemented yet. See
-[ROADMAP.md](ROADMAP.md) for scope and [HANDOFF.md](HANDOFF.md) for the next session.
+M1–M3 provide a Python package, discovery, approval records, durable state and an
+isolated fixture harness. M4 adds supervised execution for a single-user dedicated VM:
+Codex runs directly **without its sandbox**, and trusted dependency/build/test and
+Docker commands run as the VM development account. See the
+[accepted decision](docs/TRUSTED_VM_DECISION.md), [execution contract](docs/EXECUTION.md),
+[roadmap](ROADMAP.md) and [handoff](HANDOFF.md). M1–M4 are complete as library APIs;
+the full autonomous workflow and operational CLI remain later milestones.
 
 Use Python 3.12 or newer and Git. Create a **separate** runner development environment;
 leave the prototype's `.venv` and project environments alone:
@@ -58,9 +62,12 @@ Tests generate new roots under `/tmp/agentic-runner-test-*`, with private reposi
 state, HOME and temporary directories. Roots are created by `DisposableRoot`,
 never supplied or adopted by a caller. Fixture mutations and fake adapter calls
 must go through that root's guard. Use [the harness guide](docs/TESTING.md) when
-adding tests. These guards prevent accidental test targeting; they do not provide
-the container security boundary planned for M4.
+adding tests. These guards prevent accidental test targeting; they do not sandbox trusted project
+code. The default suite is account-free. See [TESTING.md](docs/TESTING.md) for the
+native Python/Node integrations and the separately selected real Codex/Docker probe.
 
-No persistent service, production execution, real Codex call, or GitHub publication
-is part of M1–M3. The requested GPT-6.1-Sol/high configuration remains an M4
-capability check; discovery does not select or invoke a model.
+A disposable real Codex task and exact-ID resume passed with `gpt-6.1-sol`, high
+reasoning effort, no sandbox and approval policy never. A generated Docker application
+also passed build/run/testing through the host engine. See [M4 evidence](docs/evidence/M4-NATIVE.md).
+No persistent service, production deployment or runner publication was performed.
+Discovery remains read-only and does not invoke a model.
