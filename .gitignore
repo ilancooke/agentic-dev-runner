@@ -1,0 +1,13 @@
+.venv/
+.venv-dev/
+*.egg-info/
+build/
+dist/
+__pycache__/
+*.pyc
+.env
+.env.*
+.aws/
+.codex/
+.agents/
+*.log

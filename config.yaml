@@ -1,0 +1,20 @@
+runner:
+  workspace_root: /home/ilan/agentic-workspaces
+  state_root: /home/ilan/agentic-runner-data
+
+codex:
+  command: codex
+  model: default
+
+execution:
+  max_retries: 2
+  max_milestones_per_run: 1
+
+git:
+  auto_commit: true
+  auto_push: true
+  auto_merge: true
+
+safety:
+  require_approval_for_deployment: true
+  require_approval_for_destructive_operations: true

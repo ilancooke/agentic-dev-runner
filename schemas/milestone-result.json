@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "milestone": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["complete", "blocked", "failed"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "checks_passed": {
+      "type": "boolean"
+    },
+    "acceptance_criteria_met": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_action": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "milestone",
+    "status",
+    "summary",
+    "checks_passed",
+    "acceptance_criteria_met",
+    "blockers",
+    "next_action"
+  ]
+}
