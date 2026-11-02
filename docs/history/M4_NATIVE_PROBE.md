@@ -1,3 +1,6 @@
+> Historical pre-MVP document. Its APIs and commands were retired in revised M3.
+> Use the root README and docs/RECOVERY.md for current operation.
+
 # Native M4 disposable probe — reviewable scope
 
 User authorization: the accepted [dedicated VM decision](TRUSTED_VM_DECISION.md)
@@ -43,6 +46,6 @@ is retained under the development account. Public output contains metadata only.
 
 The real fresh/resume plus Docker command passed in M4. Both recorded turn contexts
 confirm `gpt-6.1-sol`, high effort, approval never and danger-full-access. See
-[acceptance evidence](evidence/M4-NATIVE.md) and [safe session metadata](evidence/m4-native-real-check.json).
+[acceptance evidence](../evidence/M4-NATIVE.md) and [safe session metadata](../evidence/m4-native-real-check.json).
 Default account-free probes remain the routine check; repeat real usage only when
 new changes or unresolved concerns justify it.

@@ -6,10 +6,10 @@ capabilities are implemented as M4 library APIs. The user explicitly revised exe
 to the [trusted dedicated VM](TRUSTED_VM_DECISION.md), with no Codex sandbox. Earlier
 container work is preserved as history. Native M4 acceptance passed; M5–M10 remain
 unimplemented. No operational CLI/service or publication workflow is deployed.
-See [execution](EXECUTION.md) and [M4 evidence](evidence/M4-NATIVE.md).
+See [execution](EXECUTION.md) and [M4 evidence](../evidence/M4-NATIVE.md).
 The roadmap defines deliverables and evidence required before claiming any
-capability is implemented. See [M1 evidence](evidence/M1.md) and
-[M2 evidence](evidence/M2.md) and [M3 evidence](evidence/M3.md).
+capability is implemented. See [M1 evidence](../evidence/M1.md) and
+[M2 evidence](../evidence/M2.md) and [M3 evidence](../evidence/M3.md).
 
 ## Objective and scope
 
@@ -46,7 +46,7 @@ A root ROADMAP.md has an ordered progress table of stable unique IDs and support
 statuses, with matching milestone sections containing Deliverables and Acceptance
 criteria. Content inside those sections can use prose, lists, tables, code and
 links to other project documentation. Other repository documentation stays flexible.
-The [M2 discovery contract](DISCOVERY.md) specifies exact syntax, examples and
+The [M2 discovery contract](../DISCOVERY.md) specifies exact syntax, examples and
 validation diagnostics. Arbitrary formats are not silently converted by an agent.
 
 Code chooses milestones and controls advancement. An agent implements requirements

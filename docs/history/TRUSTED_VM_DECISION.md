@@ -1,3 +1,6 @@
+> Historical pre-MVP document. Its APIs and commands were retired in revised M3.
+> Use the root README and docs/RECOVERY.md for current operation.
+
 # Accepted execution-design revision — 2026-10-30
 
 The user clarified the original purpose: automate an existing personal development
@@ -39,7 +42,7 @@ profiles as a prerequisite for native M4.
 ## Requirements and schema consequences
 
 The current ROADMAP M4 text deliberately supersedes its original container-specific
-acceptance. The original text is retained in [historical scope](evidence/M4-ORIGINAL-SCOPE.md).
+acceptance. The original text is retained in [historical scope](../evidence/M4-ORIGINAL-SCOPE.md).
 This is an explicitly accepted architecture revision, not a claim that the old
 container checks passed. Planned M5 verification wording now allows an environment
 appropriate to the project; no M5 implementation is included in M4.

@@ -2,9 +2,9 @@
 
 M1–M4 are complete. M5–M10 remain unimplemented. Do not begin M5 in this session.
 The user explicitly chose **NO Codex sandbox**; the dedicated development VM is
-its boundary. Read [ROADMAP.md](ROADMAP.md), [the accepted decision](docs/TRUSTED_VM_DECISION.md),
-[execution](docs/EXECUTION.md), [M4 evidence](docs/evidence/M4-NATIVE.md),
-[state](docs/STATE.md), [testing](docs/TESTING.md), architecture and discovery.
+its boundary. Read [ROADMAP.md](ROADMAP-PRE-MVP.md), [the accepted decision](TRUSTED_VM_DECISION.md),
+[execution](EXECUTION.md), [M4 evidence](../evidence/M4-NATIVE.md),
+[state](STATE.md), [testing](../TESTING.md), architecture and discovery.
 
 ## Purpose and agreed authority
 
@@ -83,7 +83,7 @@ approval policy never. Committed-scope approval and the separate gates above rem
 
 The real session is `01a18ee0-3a61-75d3-913f-8ff015bc67ad`. Its two actual turn_context
 records both show `gpt-6.1-sol`, effort high, approval never and danger-full-access.
-Safe settings/usage/outcomes are retained in [JSON evidence](docs/evidence/m4-native-real-check.json).
+Safe settings/usage/outcomes are retained in [JSON evidence](../evidence/m4-native-real-check.json).
 Normal Codex history remains private in the account; no tokens or raw model output
 were published. The task wrote only generated fixture files and preserved implementing
 phase/no pending intent. No model prose was treated as publication evidence.

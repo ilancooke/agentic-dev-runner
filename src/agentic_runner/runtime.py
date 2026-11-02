@@ -10,7 +10,7 @@ from .documents import Documents
 from .markdown import section_texts
 
 
-# Discovery capability policy, not a claim that M4 container images exist yet.
+# Static discovery baselines; run uses explicit project configuration instead.
 RUNTIME_LINES = {"python": (3, 12, 0), "node": (22, 0, 0)}
 
 

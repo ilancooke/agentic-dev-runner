@@ -7,10 +7,10 @@ subagents, database or scheduler. See [specification](SPEC.md),
 [architecture and component review](ARCHITECTURE.md), [roadmap](ROADMAP.md), and
 [current handoff](HANDOFF.md).
 
-Revised M1 provides the loop; M2 adds separate one-time Git/GitHub setup.
-M3 covers final recovery/live acceptance and
-retirement of obsolete paths. The existing prototype and older library APIs are
-preserved for now and are not invoked by run.
+Revised M1–M3 provide the verified loop, separate one-time setup, recovery
+acceptance and operator instructions. Obsolete prototype, orchestration, container
+and state entry points are retired. Historical contracts/evidence remain under
+docs/history and docs/evidence; they do not govern current operation.
 
 ## Install and verify
 
@@ -26,8 +26,8 @@ python3 -m venv .venv-dev
 
 There are no Python runtime dependencies. Default tests use generated owned
 fixtures, real local Git and fake Codex/GitHub responses; they consume no model or
-GitHub account. The eight optional native/container checks keep their existing skips.
-[Historical testing instructions](docs/TESTING.md) describe those checks.
+GitHub account. See [testing instructions](docs/TESTING.md) for retained coverage
+and selective account-backed probes.
 
 ## Configure and set up a project
 
@@ -115,7 +115,8 @@ and rerun the same command. A matching partial checkpoint allows a dirty checkou
 and starts a fresh session for the unfinished milestone. A recorded publication is
 reconciled and pushed before starting the next one. Failed/uncertain work is never
 reset, cleaned, rebased or force-pushed. Exit codes: 0 complete, 1 intervention,
-2 usage error, 130 interrupted.
+2 usage error, 130 interrupted. The [operator recovery guide](docs/RECOVERY.md)
+explains checkpoint phases, lost responses and human-review stops.
 
 Branch, protected-document, config or unrelated-commit changes require human
 review. Do not delete the checkpoint to bypass a guard, stage files manually during
@@ -125,9 +126,11 @@ writes are unsafe, only the checkpoint records the failure.
 
 The trusted VM/account is the execution boundary. Unsandboxed code can access that
 account; runner checks and GitHub protection do not provide hostile-code isolation.
-Development acceptance uses local bare remotes and fake GitHub/Codex; live protected
-GitHub and Codex acceptance remains M3 work. This runner has not been pushed or merged.
+Default acceptance uses local bare remotes and fake GitHub/Codex. Selective real
+Codex acceptance passed; private GitHub protection was unavailable under the tested
+account plan. [M3 evidence and cleanup limitation](docs/evidence/MVP-M3.md) distinguish
+these results. This runner has not been pushed or merged.
 
 `discover /path/to/checkout` remains available for read-only historical discovery.
-Do not execute root prototype scripts or use the reference/operational directories
+Do not restore/execute retired prototype scripts or use reference/operational directories
 as test fixtures. Earlier plans are archived under [docs/history](docs/history/).

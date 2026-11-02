@@ -10,7 +10,7 @@ on dev, then stop. No automatic merges.
 | --- | --- |
 | M1 | complete |
 | M2 | complete |
-| M3 | not started |
+| M3 | complete |
 
 ## M1 — Working loop for a prepared protected repository
 

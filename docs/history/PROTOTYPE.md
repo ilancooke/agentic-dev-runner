@@ -1,3 +1,6 @@
+> Historical pre-MVP document. Its APIs and commands were retired in revised M3.
+> Use the root README and docs/RECOVERY.md for current operation.
+
 # Preserved prototype inventory
 
 Inspected as source for M1 on 2026-10-30; none of these scripts was run or imported.
@@ -42,7 +45,7 @@ These are observations, not an exhaustive audit or repaired behavior. Future
 milestones implement approved capabilities in the package rather than enabling
 the prototype.
 
-[Preservation manifest](evidence/m1-preservation.json) records SHA-256 for all 11
+[Preservation manifest](../evidence/m1-preservation.json) records SHA-256 for all 11
 prototype artifacts and 103 reference files, including Git metadata. The reference
 snapshot excludes `.venv`, `__pycache__` and `.pytest_cache`; those directories were
 not executed or modified. Operational state was not read, snapshotted or used as

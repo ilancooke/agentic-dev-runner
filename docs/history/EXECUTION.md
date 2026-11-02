@@ -1,3 +1,6 @@
+> Historical pre-MVP document. Its APIs and commands were retired in revised M3.
+> Use the root README and docs/RECOVERY.md for current operation.
+
 # Execution contract — trusted development VM
 
 The accepted [design decision](TRUSTED_VM_DECISION.md) replaces mandatory runner
@@ -63,10 +66,10 @@ The [native probe](M4_NATIVE_PROBE.md) defaults to credential-free checks in a d
 repository. Its optional real mode uses one fresh Codex session and one exact-ID
 resume with no sandbox and the fixed requested model/effort. An optional Docker
 probe builds/runs/removes only a generated, uniquely labeled test image.
-M4 acceptance is complete; see [the actual checks](evidence/M4-NATIVE.md).
+M4 acceptance is complete; see [the actual checks](../evidence/M4-NATIVE.md).
 
 The [old container contract](CONTAINER_EXECUTION_HISTORY.md), container adapter,
-image/test assets and [diagnosis](evidence/M4-SANDBOX-DIAGNOSIS.md) are preserved
+image/test assets and [diagnosis](../evidence/M4-SANDBOX-DIAGNOSIS.md) are preserved
 as historical work. Their blocked nested-sandbox checks are not native prerequisites.
 
 ## Runtime setup and limits

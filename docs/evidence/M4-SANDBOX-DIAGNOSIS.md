@@ -1,3 +1,6 @@
+> Historical pre-MVP evidence; milestone IDs here refer to the retired plan.
+> Current acceptance is recorded in MVP-M3.md.
+
 # Historical container diagnosis — superseded requirement
 
 The user subsequently chose direct VM execution with no Codex sandbox.
@@ -18,7 +21,7 @@ The existing M4 image stayed at
 `sha256:5cb0fed98f68ac5284b129c6090cd1c75d17f09583f2cb5789d25a6e2d4e3121`.
 A separate runner-owned diagnostic image adds Debian strace 6.1 and libunwind8:
 `sha256:feaada7b4a5fa704fa4440fd11be59a1ad386e2a75642c2f3a43215134ed485f`.
-Its Dockerfile is [here](../../containers/m4/diagnostics/Dockerfile). Verify the local
+Its Dockerfile was `containers/m4/diagnostics/Dockerfile` at Git revision `26312e0` (now retired). Verify the local
 base tag's image ID before building; Dockerfile `FROM sha256:<local image ID>` is
 not a supported way to resolve a local image and initially attempted a registry
 lookup. The corrected build uses the inspected local base tag. No registry

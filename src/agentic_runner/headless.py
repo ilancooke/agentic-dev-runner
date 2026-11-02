@@ -16,7 +16,7 @@ REPORT_SCHEMA = {
         "status": {"type": "string", "enum": ["success", "blocked", "failed"]},
         "summary": {"type": "string"},
         "blockers": {"type": "array", "items": {"type": "string"}},
-        "commit_message": {"type": "string"},
+        "commit_message": {"type": "string", "pattern": r"^[^\u0000-\u001f]{0,200}$"},
     },
     "required": ["milestone", "status", "summary", "blockers", "commit_message"],
 }
@@ -39,6 +39,8 @@ def generate(project, milestone, documents, env, *, process=supervise):
         f"Implement or resume ONLY {milestone.id}: {milestone.title}.\n"
         "You are in a trusted Ubuntu VM with no Codex sandbox. Work may be partially implemented.\n"
         "Run the required tests and update PROGRESS.md. Return the structured report.\n"
+        "A success report must have blockers=[] and a nonempty proposed commit_message of at most 200 characters, "
+        "with no newline or control characters. Proposing a message does not authorize Git operations.\n"
         "Perform NO Git or GitHub operations, including staging, commits, branches, pushes or merges.\n"
         "Do not use subagents. Do not modify AGENTS.md, SPEC.md, ARCHITECTURE.md, ROADMAP.md or runner configuration.\n"
         "The runner independently verifies, marks completion, commits and pushes to dev.\n"
@@ -61,4 +63,8 @@ def generate(project, milestone, documents, env, *, process=supervise):
             value = json.loads(output.read_text())
         except (OSError, ValueError) as exc:
             raise RunnerError("Codex did not return a valid structured result; partial work retained.") from exc
-    return validate_report(value, milestone.id)
+    try:
+        return validate_report(value, milestone.id)
+    except RunnerError as exc:
+        exc.report = value
+        raise

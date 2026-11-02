@@ -1,4 +1,4 @@
-# Read-only discovery contract (M2)
+# Read-only discovery contract
 
 ```bash
 .venv-dev/bin/agentic-runner discover /path/to/checkout
@@ -51,7 +51,7 @@ allowlisted, with user/system Git config, optional locks, lazy fetch and replace
 objects disabled. Hooks and fsmonitor are disabled for these reads. No status,
 diff, filter, credential helper, project command, transport or shell is invoked.
 Each Git read has a 10-second timeout. This is a narrow read-only adapter, not the
-publication adapter planned for M5.
+setup/run Git adapter described in the root ARCHITECTURE.md.
 
 ## Roadmap grammar
 
@@ -134,8 +134,9 @@ Local evidence must be regular files inside the canonical worktree and outside
 symlinked evidence/source directories fail. Explicit ancestor AGENTS files are
 the only documents read outside the worktree. Their local links must point into
 the worktree too. External links are listed for inspection without fetching them;
-they are not treated as approved, captured requirements. [M3 approval](STATE.md)
-captures committed local references/assets and refuses uncaptured external links.
+they do not authorize execution. The revised runner supplies only the five required
+root documents and the selected milestone; operators must capture required external
+context locally before running.
 
 The scan skips `.git`, `.venv`, `.venv-dev`, `node_modules`, `__pycache__`, `.tox`,
 `.pytest_cache`, `build` and `dist`. It fails on scan errors, more than 20000 scan
@@ -153,12 +154,13 @@ scripts, imports, package scripts and dependency resolution never run in preflig
 
 The initial global discovery policy advertises Python **3.12.0** and Node
 **22.0.0** baselines, selecting lines `3.12` and `22` respectively. These are
-capability targets, not installed containers or a claim about image patch versions.
+static discovery targets, not a claim about installed runtimes. Run uses explicit
+project configuration and the operator-provisioned native environment.
 `requires-python`, `engines.node`, version files, and documented Runtime declarations
 must all admit the selected baseline. Absence of a version constraint uses the
 policy default and records that source. Constraints needing another minor/major
 or a newer exact/minimum patch fail; extending this conservative policy requires
-appropriate capability evidence in M4. Requirements are retained in the result.
+deliberate discovery-policy changes. Requirements are retained in the result.
 
 The version subset is numeric major/minor/patch, equality/inequality, `>=`, `<=`,
 `>`, `<`, and trailing `.*`/`.x` wildcards for equality. Python supports `~=` with
@@ -218,16 +220,15 @@ Free-form AGENTS prose is inventoried and hashed for the implementing agent; it
 does not control the deterministic runtime/check selectors. Arbitrary natural
 language contradictions cannot be proven or reconciled by this scanner. They
 require review before authorization; success here does not waive those instructions
-or authorize any command. CI files are inventory only: M5 must interpret mandatory
-CI and gate requirements rather than treating local discovery as CI success.
+or authorize any command. CI files are inventory only. Configure any required CI
+verification explicitly for run; local discovery is not CI success.
 
 ## Limits of this evidence
 
 Results describe a local working-tree read and can include uncommitted documents.
 They are not an atomic snapshot or an approval record. No remote freshness, scope
 authorization, sandbox compatibility, runtime installation, verification success,
-service behavior or publication safety is claimed. The [M3 state layer](STATE.md)
-adds committed approval snapshots, scope protection and canonical locking; discovery
-JSON alone remains insufficient. M4 and M5 must provide execution and publication
-boundaries. Concurrent hostile filesystem changes are outside the M1 harness/M2
-read-only preflight guarantee.
+service behavior or publication safety is claimed. The revised setup/run commands
+use their own explicit configuration, checkpoints and Git boundary; they do not
+import discovery JSON as authorization. Concurrent hostile filesystem changes are
+outside this read-only inspection guarantee.

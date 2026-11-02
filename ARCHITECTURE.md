@@ -17,11 +17,12 @@ ROADMAP.md and HANDOFF.md define implementation status and the session boundary.
 | Discovery/runtime inference | Preserve discover; run uses explicit project config/checks. |
 | Approval/event/state framework, binary pinning, exact-session resume | Remove from MVP path; reconstruct fresh sessions from files. |
 | Container/nested sandbox adapters | Remove from MVP path; project checks may use Docker. |
-| Root prototype scripts/config/schema/skill | Preserve until M3 retirement; never invoke. |
+| Root prototype scripts/config/schema/skill | Retired in M3; preserve history/evidence, never invoke. |
 | PR/merge, CI repair, main reconciliation, scheduler, systemd | Remove from plan. |
 
-Retain old tests until deliberate M3 retirement. New run code does not import the
-old orchestration framework or its policy/state machinery.
+M3 retired unused approval/state/native/container adapters, their tests/probes and
+prototype entry points. Useful supervisor/persistence/discovery tests remain.
+No run code imports the retired framework. Runtime dependencies remain empty.
 
 ## Commands and configuration
 
@@ -85,17 +86,22 @@ Before publication, failure retains partial files and records an issue in the
 checkpoint and, when safely on dev, PROGRESS.md. A matching manual rerun starts a
 fresh session for that same milestone. Arbitrary dirty starts, changed controls,
 branch or unrelated commits require intervention. Publication intent precedes
-completion/staging/commit; manual rerun reconciles the exact recorded tree/commit
-and retries dev push before starting another task. Divergence stops. Never reset,
-rebase, clean, force push or adopt unrelated commits.
+atomic roadmap completion/staging/commit; temporary completion bytes stay in
+private Git metadata outside the publishable inventory. Manual rerun reconciles the
+exact recorded tree/commit and retries dev push before starting another task. Divergence stops. Never reset,
+rebase, clean, force push or adopt unrelated commits. Once recorded, a commit ID
+cannot be replaced by another commit with the same tree/parent/message. Completed
+reruns recheck commit, files, controls, main/dev refs and protection even when the
+roadmap is entirely complete. Invalid model reports stay in private metadata.
 
 ## Testing and limits
 
 Owned disposable repositories exercise real commits/pushes to local bare remotes,
 with fake Codex/GitHub responses. Test multi-milestone completion, main guards,
-failed reports/checks, partial work and publication interruption. Live-account
-evidence is distinct and scheduled for M3. Checks use the existing native project
-environment; provisioning belongs to the operator. Remote CI is not polled by MVP;
+failed reports/checks, partial work and abrupt process loss across publication and
+atomic-write boundaries. Live-account evidence is distinct and recorded in
+docs/evidence/MVP-M3.md; docs/RECOVERY.md documents operator continuation.
+Checks use the existing native project environment; provisioning belongs to the operator. Remote CI is not polled by MVP;
 any required CI verification must be explicitly configured.
 
 Launch flags were checked against the installed CLI and

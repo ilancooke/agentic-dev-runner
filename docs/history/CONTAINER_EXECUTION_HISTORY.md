@@ -1,3 +1,6 @@
+> Historical pre-MVP document. Its APIs and commands were retired in revised M3.
+> Use the root README and docs/RECOVERY.md for current operation.
+
 # Historical container execution contract — superseded
 
 The user replaced this execution design with the [dedicated VM decision](TRUSTED_VM_DECISION.md).

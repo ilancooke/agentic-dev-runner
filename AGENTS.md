@@ -1,7 +1,7 @@
 # Repository workflow
 
 Read SPEC.md, ARCHITECTURE.md, ROADMAP.md, PROGRESS.md and HANDOFF.md before editing.
-Historical plans and the preserved prototype do not govern new work.
+Historical plans and the retired prototype do not govern new work.
 
 - Implement one revised milestone per session. Test, update progress/handoff,
   commit on the development branch, then stop.

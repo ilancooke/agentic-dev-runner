@@ -1,7 +1,10 @@
+> Historical pre-MVP evidence; milestone IDs here refer to the retired plan.
+> Current acceptance is recorded in MVP-M3.md.
+
 # Superseded M4 scope — retained historical requirements
 
 The user revised this design after clarifying the trusted, single-user dedicated-VM workflow.
-See [the accepted decision](../TRUSTED_VM_DECISION.md). This text is historical, not current acceptance.
+See [the accepted decision](../history/TRUSTED_VM_DECISION.md). This text is historical, not current acceptance.
 
 ## M4 — Container execution and Codex adapter
 

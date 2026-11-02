@@ -1,7 +1,6 @@
 """Bounded subprocess capture, cancellation and whole-process-group cleanup.
 
-Only authorized adapters construct argv. Native project execution requires the
-explicit trusted-VM policy; the preserved container adapter has a separate policy.
+The runner supplies literal argv for trusted native project execution.
 Raw captures stay in memory and must never be sent to public logs.
 """
 

@@ -1,16 +1,16 @@
 # Autonomous Codex Development Runner
 
 Approved architecture and implementation plan, 2026-10-30. See
-[architecture](docs/ARCHITECTURE.md) and [session handoff](HANDOFF.md).
+[architecture](ARCHITECTURE.md) and [session handoff](HANDOFF-PRE-MVP.md).
 Implement one milestone per fresh session. Do not advance without recording
 acceptance evidence. M1–M4 are complete under the accepted trusted-VM design;
-M5–M10 remain unimplemented. See [M4 acceptance evidence](docs/evidence/M4-NATIVE.md),
-[M1 acceptance evidence](docs/evidence/M1.md), [M2 evidence](docs/evidence/M2.md),
-and [M3 evidence](docs/evidence/M3.md).
+M5–M10 remain unimplemented. See [M4 acceptance evidence](../evidence/M4-NATIVE.md),
+[M1 acceptance evidence](../evidence/M1.md), [M2 evidence](../evidence/M2.md),
+and [M3 evidence](../evidence/M3.md).
 
 This document uses the proposed roadmap convention: a progress table with stable
 IDs and matching milestone sections containing Deliverables and Acceptance
-criteria. [The discovery contract](docs/DISCOVERY.md) specifies the supported
+criteria. [The discovery contract](../DISCOVERY.md) specifies the supported
 Markdown grammar. The preserved prototype parser does not support this document
 as an execution input; use the new package for read-only parsing/discovery.
 
@@ -101,8 +101,8 @@ Phase: Generalization and architecture. Depends on M2.
 ## M4 — Native VM execution and Codex adapter
 
 Phase: Generalization and architecture. Depends on M3.
-Revised with explicit user agreement to the [trusted dedicated-VM design](docs/TRUSTED_VM_DECISION.md).
-The [original container scope](docs/evidence/M4-ORIGINAL-SCOPE.md) is retained as history.
+Revised with explicit user agreement to the [trusted dedicated-VM design](TRUSTED_VM_DECISION.md).
+The [original container scope](../evidence/M4-ORIGINAL-SCOPE.md) is retained as history.
 
 ### Deliverables
 

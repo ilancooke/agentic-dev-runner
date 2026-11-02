@@ -1,6 +1,9 @@
+> Historical pre-MVP evidence; milestone IDs here refer to the retired plan.
+> Current acceptance is recorded in MVP-M3.md.
+
 # M4 acceptance evidence — native trusted VM — complete
 
-M4 is complete under the [explicitly accepted execution revision](../TRUSTED_VM_DECISION.md):
+M4 is complete under the [explicitly accepted execution revision](../history/TRUSTED_VM_DECISION.md):
 Codex runs directly on the dedicated VM with **no sandbox and no approval prompts**.
 This replaces the original nested-container requirement. The
 [original scope](M4-ORIGINAL-SCOPE.md), container work and diagnosis remain historical;

@@ -88,6 +88,28 @@ class Loop:
         git.remote_guard(record["remote_main"])
         return before
 
+    def write_completion(self, record):
+        root, area = self.git.root, self.state_path.parent
+
+        def guard(path):
+            require(not path.is_symlink() and (path in {root, root / "ROADMAP.md", area} or
+                    path.parent == area), "Unsafe roadmap completion path.")
+
+        # Keep interrupted temporary files inside private Git metadata, outside the
+        # publishable inventory. Rename leaves either original or completed text.
+        DurableIO(guard).atomic(root / "ROADMAP.md", record["completed_roadmap"].encode(),
+                                temporary_directory=area, mode=(root / "ROADMAP.md").stat().st_mode & 0o777)
+
+    def committed(self, record):
+        git, head = self.git, self.git.head()
+        require(record.get("commit", head) == head and record.get("tree") and
+                git.git("rev-parse", "HEAD^{tree}") == record["tree"] and
+                git.git("rev-list", "--parents", "-n", "1", "HEAD") == f"{head} {record['base']}" and
+                git.git("log", "-1", "--format=%B").strip() == record["report"]["commit_message"],
+                "Commit does not match recorded publication intent; human review required.")
+        require(not git.git("status", "--porcelain"), "Uncommitted changes after commit; inspect before pushing.")
+        return head
+
     def publish(self, record):
         git = self.git
         self.invariants(record, publishing=True)
@@ -97,11 +119,12 @@ class Loop:
             files = git.snapshot()
             expected = dict(record["files"])
             if (git.root / "ROADMAP.md").read_text() == record["completed_roadmap"]:
-                expected["ROADMAP.md"] = [fingerprint(record["completed_roadmap"].encode()), files["ROADMAP.md"][1]]
+                expected["ROADMAP.md"] = [fingerprint(record["completed_roadmap"].encode()), record["files"]["ROADMAP.md"][1]]
             require(files == expected, "Files changed since verification; publication needs human review.")
             git.guard(record["main"], record["base"])
-            (git.root / "ROADMAP.md").write_text(record["completed_roadmap"])
-            expected = git.snapshot()
+            self.write_completion(record)
+            expected["ROADMAP.md"] = [fingerprint(record["completed_roadmap"].encode()), record["files"]["ROADMAP.md"][1]]
+            require(git.snapshot() == expected, "Files changed during roadmap completion; human review required.")
             paths = sorted(name for name in set(expected) | set(record["initial_files"])
                            if expected.get(name) != record["initial_files"].get(name))
             require(paths, "No verified changes to commit.")
@@ -122,12 +145,7 @@ class Loop:
             git.guard(record["main"], record["base"])
             git.git("commit", "--no-gpg-sign", "-m", record["report"]["commit_message"])
             head = git.head()
-        require(record.get("tree") and git.git("rev-parse", "HEAD^{tree}") == record["tree"] and
-                git.git("rev-list", "--parents", "-n", "1", "HEAD") == f"{head} {record['base']}" and
-                git.git("log", "-1", "--format=%B").strip() == record["report"]["commit_message"],
-                "Commit does not match recorded publication intent; human review required.")
-        require(not git.git("status", "--porcelain"), "Uncommitted changes after commit; inspect before pushing.")
-        record["commit"] = head
+        record["commit"] = head = self.committed(record)
         self.save(record)
         git.push(record["remote_main"])
         record.update(phase="complete", issue=None)
@@ -136,6 +154,9 @@ class Loop:
 
     def failure(self, record, error):
         record["issue"] = str(error) or type(error).__name__
+        if hasattr(error, "report"):
+            self.io.atomic(self.state_path.with_name("last-report.json"), json.dumps(error.report).encode() + b"\n")
+            record["issue"] += " Invalid structured report: .git/ralph/last-report.json."
         if hasattr(error, "process"):
             for name in ("stdout", "stderr"):
                 self.io.atomic(self.state_path.with_name(f"last-failure.{name}"), getattr(error.process, name))
@@ -165,10 +186,22 @@ class Loop:
                 require(record.get("git_config_hash") == git.config_hash, "Git configuration differs from the checkpoint; review before resuming.")
                 require(record.get("phase") in {"implementing", "publishing", "complete"}, "Unknown checkpoint phase.")
                 require({"milestone", "base", "main", "remote_main", "controls", "initial_files"} <= record.keys(), "Checkpoint is incomplete; retain it for review.")
-                if record["phase"] == "publishing":
+                if record["phase"] in {"publishing", "complete"}:
                     require({"files", "report", "completed_roadmap"} <= record.keys(), "Publication checkpoint is incomplete.")
                     validate_report(record["report"], record["milestone"])
+                    require(record["report"]["status"] == "success", "Publication requires a successful report.")
             while True:
+                if record is not None and record["phase"] == "complete":
+                    try:
+                        self.invariants(record, publishing=True)
+                        require(record.get("commit"), "Completed checkpoint lacks its published commit.")
+                        self.committed(record)
+                        git.remote_guard(record["remote_main"])
+                        require(git.remote_ref(self.project.development_branch) == record["commit"],
+                                "Completed publication differs from remote development branch; human review required.")
+                    except (Exception, KeyboardInterrupt) as exc:
+                        self.failure(record, exc)
+                        raise
                 if record is None or record["phase"] == "complete":
                     require(not git.git("status", "--porcelain"), "A new milestone requires a clean checkout; only matching partial checkpoints may resume.")
                     documents = self.project.documents()
