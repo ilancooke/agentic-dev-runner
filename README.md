@@ -1,73 +1,90 @@
-# Agentic development runner
+# Minimal Ralph development runner
 
-M1–M3 provide a Python package, discovery, approval records, durable state and an
-isolated fixture harness. M4 adds supervised execution for a single-user dedicated VM:
-Codex runs directly **without its sandbox**, and trusted dependency/build/test and
-Docker commands run as the VM development account. See the
-[accepted decision](docs/TRUSTED_VM_DECISION.md), [execution contract](docs/EXECUTION.md),
-[roadmap](ROADMAP.md) and [handoff](HANDOFF.md). M1–M4 are complete as library APIs;
-the full autonomous workflow and operational CLI remain later milestones.
+A manually launched Python runner implements ROADMAP.md milestones using fresh
+headless Codex sessions, independently verifies changes, and commits/pushes only to
+the configured development branch. Humans merge main. No service, automatic merge,
+subagents, database or scheduler. See [specification](SPEC.md),
+[architecture and component review](ARCHITECTURE.md), [roadmap](ROADMAP.md), and
+[current handoff](HANDOFF.md).
 
-Use Python 3.12 or newer and Git. Create a **separate** runner development environment;
-leave the prototype's `.venv` and project environments alone:
+Revised M1 provides the loop for **already prepared, protected repositories**.
+M2 will add separate one-time setup. M3 covers final recovery/live acceptance and
+retirement of obsolete paths. The existing prototype and older library APIs are
+preserved for now and are not invoked by run.
 
-```bash
+## Install and verify
+
+Ubuntu, Python 3.12+, Git, authenticated `gh` and authenticated `codex` are expected.
+Use a separate environment for runner development:
+
+```sh
 python3 -m venv .venv-dev
 .venv-dev/bin/python -m pip install -e .
 .venv-dev/bin/agentic-runner --help
-.venv-dev/bin/agentic-runner --version
-.venv-dev/bin/python -m agentic_runner --version
 .venv-dev/bin/python -m unittest discover -s tests -v
 ```
 
-Inspect a checkout without running project code or contacting its remote:
+There are no Python runtime dependencies. Default tests use generated owned
+fixtures, real local Git and fake Codex/GitHub responses; they consume no model or
+GitHub account. The eight optional native/container checks keep their existing skips.
+[Historical testing instructions](docs/TESTING.md) describe those checks.
 
-```bash
-.venv-dev/bin/agentic-runner discover /path/to/checkout
-```
+## Run a prepared project
 
-The command prints JSON with repository/default-branch evidence, the selected
-milestone, runtime/check declarations and source hashes, or an actionable diagnostic
-with no partial selection. Read the [discovery contract](docs/DISCOVERY.md) for the
-supported roadmap grammar, evidence rules, conservative runtime policy and limits.
-No per-project runner configuration file is required.
+Copy [project.example.toml](project.example.toml) to a runner-owned location and set
+`name` (GitHub owner/repository), `repository`, `development_branch` and `verification`.
+Relative repository paths resolve from the config file. Verification is a nonempty
+list of literal argv arrays, executed without a shell. Provision dependencies in
+advance and use exact executable paths when needed.
 
-M3 adds library APIs for explicit start authorization, canonical repository locking,
-atomic state, append-only events, pending intent and scope invalidation. Read the
-[state/approval contract](docs/STATE.md) for permitted progress edits and recovery.
-The CLI remains read-only; operational start/service wiring is planned for M9.
+The project must already have nonempty root AGENTS.md, SPEC.md, ARCHITECTURE.md,
+ROADMAP.md and PROGRESS.md; a clean Git checkout on dev; matching local/remote main
+baselines; an origin URL matching the configured GitHub name; a local GitHub noreply
+identity; and dev HEAD matching its remote. The existing
+[roadmap grammar](docs/DISCOVERY.md) defines the two-column progress table and
+matching milestone deliverables/acceptance sections. Only the five root documents
+are required by run; historical discover requirements are separate.
 
-Run setup and tests from this directory. Installation needs setuptools >=68 from
-the configured package index (or a pre-provisioned wheel source). Setuptools is
-the only build dependency; the package and tests have no third-party runtime
-dependencies. `unittest` is part of Python. No activation or global installation
-is necessary. The installed console script and module use the same entry point.
-With no arguments the CLI prints help. Unknown commands, including `start`, fail
-with exit code 2. Help/version do not load project/state data or launch tools.
-Discovery performs fixed read-only Git queries and reads documents; it never loads
-legacy `config.yaml`, invokes the prototype, executes project code, or writes state.
-
-## Verification
+Main protection must require PRs, enforce administrators, have no PR bypass
+allowances, and prohibit force pushes/deletions. The runner reads it before work
+and publication and stops if unavailable. Rulesets alone are not currently
+supported; a compatible branch-protection rule is required. Run never changes
+protection or establishes main. M2 will automate setup separately.
 
 ```sh
-.venv-dev/bin/python -m unittest discover -s tests -v
+.venv-dev/bin/agentic-runner run --config /path/to/project.toml
 ```
 
-The root Python scripts, `config.yaml`, `schemas/`, and `skills/` are the preserved
-prototype. **Do not run them for development verification**: they target existing
-repositories, operational state, Codex, and GitHub. Read the
-[prototype inventory](docs/PROTOTYPE.md) before investigating them.
+Codex runs directly as the trusted VM user, **without its sandbox**, using
+`gpt-6.1-sol` and high effort. Each milestone gets a fresh session with the project
+texts and explicit verification commands. Codex updates PROGRESS.md and reports;
+the runner checks files/branch/HEAD, runs verification, marks completion, commits
+and explicitly pushes dev. The loop continues until complete or blocked.
 
-Tests generate new roots under `/tmp/agentic-runner-test-*`, with private repository,
-state, HOME and temporary directories. Roots are created by `DisposableRoot`,
-never supplied or adopted by a caller. Fixture mutations and fake adapter calls
-must go through that root's guard. Use [the harness guide](docs/TESTING.md) when
-adding tests. These guards prevent accidental test targeting; they do not sandbox trusted project
-code. The default suite is account-free. See [TESTING.md](docs/TESTING.md) for the
-native Python/Node integrations and the separately selected real Codex/Docker probe.
+Run stays in the foreground; tmux can preserve it across SSH disconnects. Ctrl-C
+stops and retains work. Verification runs in the existing native project environment;
+there is no automatic remote CI polling. Add any required CI command explicitly.
 
-A disposable real Codex task and exact-ID resume passed with `gpt-6.1-sol`, high
-reasoning effort, no sandbox and approval policy never. A generated Docker application
-also passed build/run/testing through the host engine. See [M4 evidence](docs/evidence/M4-NATIVE.md).
-No persistent service, production deployment or runner publication was performed.
-Discovery remains read-only and does not invoke a model.
+## Failure and manual resume
+
+Read the CLI issue, PROGRESS.md and `.git/ralph/checkpoint.json`. Fix the blocker
+and rerun the same command. A matching partial checkpoint allows a dirty checkout
+and starts a fresh session for the unfinished milestone. A recorded publication is
+reconciled and pushed before starting the next one. Failed/uncertain work is never
+reset, cleaned, rebased or force-pushed. Exit codes: 0 complete, 1 intervention,
+2 usage error, 130 interrupted.
+
+Branch, protected-document, config or unrelated-commit changes require human
+review. Do not delete the checkpoint to bypass a guard, stage files manually during
+an implementing checkpoint, or silently switch its configured identity. If the
+runner stops before creating a checkpoint, correct preflight and rerun. When project
+writes are unsafe, only the checkpoint records the failure.
+
+The trusted VM/account is the execution boundary. Unsandboxed code can access that
+account; runner checks and GitHub protection do not provide hostile-code isolation.
+No main updates, merges, live publication of this runner or persistent services
+were performed during M1 development.
+
+`discover /path/to/checkout` remains available for read-only historical discovery.
+Do not execute root prototype scripts or use the reference/operational directories
+as test fixtures. Earlier plans are archived under [docs/history](docs/history/).

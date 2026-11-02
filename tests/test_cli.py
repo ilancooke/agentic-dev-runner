@@ -21,7 +21,7 @@ class CliTests(unittest.TestCase):
             cwd = factory.state("cli-cwd")
             env = factory.environment()
             for command, arguments, expected, code in (
-                ([str(executable)], [], "Read-only repository and roadmap discovery", 0),
+                ([str(executable)], [], "Run verified milestones on a development branch", 0),
                 ([str(executable)], ["--help"], "--version", 0),
                 ([str(executable)], ["--version"], f"agentic-runner {__version__}", 0),
                 ([sys.executable, "-m", "agentic_runner"], ["--version"], f"agentic-runner {__version__}", 0),
@@ -43,7 +43,7 @@ class CliTests(unittest.TestCase):
             patch("subprocess.run", side_effect=AssertionError("unexpected process")),
         ):
             self.assertEqual(main([]), 0)
-        self.assertIn("Read-only repository and roadmap discovery", output.getvalue())
+        self.assertIn("Run verified milestones on a development branch", output.getvalue())
 
     def test_package_never_imports_prototype_or_legacy_dependencies(self):
         # Verify a fresh interpreter import, not just the already cached modules.

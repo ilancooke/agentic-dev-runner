@@ -1,0 +1,7 @@
+# Copy to a runner-owned config outside the managed project. Paths are relative
+# to this file. Prepare the protected repo manually until M2 supplies setup.
+[project]
+name = "YOUR_ACCOUNT/YOUR_PROJECT"
+repository = "/absolute/path/to/project"
+development_branch = "development"
+verification = [["python3", "-m", "unittest", "discover", "-s", "tests", "-v"]]
