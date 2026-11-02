@@ -1,5 +1,5 @@
 # Copy to a runner-owned config outside the managed project. Paths are relative
-# to this file. Prepare the protected repo manually until M2 supplies setup.
+# to this file. Run setup --config <this-file>, then run --config <this-file>.
 [project]
 name = "YOUR_ACCOUNT/YOUR_PROJECT"
 repository = "/absolute/path/to/project"

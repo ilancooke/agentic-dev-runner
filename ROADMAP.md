@@ -9,7 +9,7 @@ on dev, then stop. No automatic merges.
 | Milestone | Status |
 | --- | --- |
 | M1 | complete |
-| M2 | not started |
+| M2 | complete |
 | M3 | not started |
 
 ## M1 — Working loop for a prepared protected repository

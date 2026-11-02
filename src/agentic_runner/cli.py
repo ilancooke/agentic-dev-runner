@@ -18,14 +18,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     preflight.add_argument("repository", help="Checkout directory (or a directory inside it)")
     run = subparsers.add_parser("run", help="Run milestones in an already prepared, protected repository")
     run.add_argument("--config", required=True, help="Runner-owned project TOML configuration")
+    setup = subparsers.add_parser("setup", help="One-time Git/GitHub baseline and main protection setup")
+    setup.add_argument("--config", required=True, help="Runner-owned project TOML configuration")
     args = parser.parse_args(argv)
-    if args.command == "run":
+    if args.command in {"run", "setup"}:
         from .diagnostics import DiscoveryError
         from .project import Project, RunnerError
         from .runner import Loop
 
         try:
-            Loop(Project.load(args.config)).run()
+            project = Project.load(args.config)
+            if args.command == "setup":
+                from .setup import Setup
+                Setup(project).run()
+            else:
+                Loop(project).run()
         except KeyboardInterrupt:
             print("Stopped; partial work and checkpoint retained.")
             return 130

@@ -29,8 +29,24 @@ old orchestration framework or its policy/state machinery.
 to outlive SSH. TOML selects one project and explicit nonempty verification argv
 lists, without shell inference. Paths resolve relative to config. M1 requires an
 already prepared checkout, local noreply identity, origin, main and dev branches,
-and enforceable GitHub protection. M2 adds the separate `setup` command; run never
+and enforceable GitHub protection. M2 provides the separate `setup` command; run never
 performs setup implicitly. No daemon or automatic approval workflow is introduced.
+
+Setup reuses config/document validation, Git command/config guards, file inventory,
+the repository lock and atomic checkpoint I/O. `.git/ralph/setup.json` records its
+identity, original files/refs, baseline commit and switch intent separately from run.
+New Git checkouts receive one initial main commit; existing history must be clean.
+An initial commit object is recorded before creating its main ref, so lost responses
+can be reconciled without adopting unrelated commits. Existing origins/refs are
+validated and never replaced. Only setup may publish an absent main baseline.
+
+Authenticated GitHub account metadata supplies a repository-local noreply identity.
+The named repo is queried before private creation; HTTP/auth/transport failures do
+not imply absence. Setup requires admin permission, writes missing main protection,
+reads it back, then creates/switches/publishes dev. Existing compatible protection
+is read-only, preserving stronger options; incompatible policies require manual
+strengthening instead of replacement. Missing plan/permission support stops setup
+and leaves its effects for manual rerun. Setup refuses an existing run checkpoint.
 
 ## Loop and Git boundary
 

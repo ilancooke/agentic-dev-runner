@@ -1,68 +1,74 @@
-# Revised M1 complete — stop; next session is M2 only
+# Revised M2 complete — stop; next session is M3 only
 
-The user's current request supersedes the previous orchestration design. Read
-AGENTS.md, SPEC.md, ARCHITECTURE.md, ROADMAP.md and PROGRESS.md. The former handoff,
-architecture and roadmap are archived in docs/history for context only. Do not
-resume historical M5 or reintroduce automatic merges, scheduling, services or agents.
+Read AGENTS.md, SPEC.md, ARCHITECTURE.md, ROADMAP.md and PROGRESS.md. The revised
+three-milestone MVP governs work; historical plans/prototype do not. No automatic
+merges, scheduling, services, database or agents. Never run root prototype scripts.
 
-This session implemented only revised M1: a working sequential CLI loop for an
-already prepared protected project. M2/M3 are unfinished. Do not begin M2 within
-this session. The development branch is `mvp-runner`, created from clean main
-`2f743da`. The checkpoint commit is titled `Complete revised M1: minimal verified development loop`;
-use `git log -1` for its ID. Do not push this runner or merge.
+This session implemented only revised M2: separate one-time Git/GitHub setup.
+M1/M2 are complete; M3 is unfinished. Do not begin M3 in this session. The development
+branch remains `mvp-runner`, based on unchanged main `2f743da`. This checkpoint is
+`Complete revised M2: separate safe Git and GitHub setup`; use `git log -1` for its
+ID. Do not push this runner or merge. Humans merge manually.
 
-## Current paths
+## Current implementation
 
-- `project.py`: explicit stdlib TOML config, five required root documents.
-- `headless.py`: fresh structured `codex exec`, no sandbox, gpt-6.1-sol/high,
-  both multi-agent feature flags disabled; no exact-session resume or fallback.
-- `git_boundary.py`: matching origin, local noreply identity, explicit branch checks,
-  GitHub main-protection reads, file inventory, literal Git operations and dev push.
-- `runner.py`: selection, independent verification, completion, controlled commit,
-  push, lock and one atomic checkpoint under `.git/ralph/`.
-- CLI now supports `run --config` alongside historical read-only `discover`.
-  `project.example.toml` shows configuration. `setup` intentionally does not exist yet.
+- `setup.py`: `Setup` validates documents/config and ordinary owned checkout,
+  initializes absent Git, creates a private GitHub repo or connects a matching
+  existing origin, and configures local authenticated-account noreply identity.
+- Setup records identity/files/refs and a baseline commit before creating main's
+  ref. Existing history must be clean; existing main and remote main must match.
+  It never replaces a remote or existing branch history. Remote history without
+  main and unrelated/detached branches require manual preparation.
+- Setup writes absent main protection and reads it back before dev switch/push.
+  PR review, administrators, empty bypass allowances and disabled force pushes /
+  deletions are required. Existing compliant protection is left untouched, including
+  stronger checks/review settings. Incompatible policies stop with instructions to
+  strengthen them manually rather than risk replacing additional rules.
+- `.git/ralph/setup.json` is private and atomic, distinct from run's checkpoint.
+  Setup shares the repository lock. Reruns reconcile lost creation/commit/ref/push /
+  protection/switch responses. Target document identity is recorded before switching
+  to an existing descendant dev branch. A run checkpoint prevents further setup.
+- `git_boundary.py`: shared Git commands, local config/origin checks and protection
+  validation are reused by setup and run. Routine run never invokes setup writes.
+- CLI supports `setup --config`, `run --config` and historical read-only `discover`.
+  README and project.example.toml now document setup, plan/permission failures and
+  manual setup continuation. Python runtime dependencies remain empty.
 
-Reused roadmap/Markdown parsing, supervisor, DurableIO, Repository config inspection,
-DisposableRoot and fixture helpers. Old approval/run-state/container paths are not
-imported by the new execution path; preserve them until deliberate M3 retirement.
-Never run root prototype scripts; their hardcoded targets/automatic merging remain
-unsafe for development verification.
+Existing M1 project/headless/loop behavior remains: explicit verification argv,
+unsandboxed `gpt-6.1-sol` / high, disabled subagents, fresh sessions, independent
+checks, runner-owned dev commits/pushes, main invariants and preserved failed work.
+Old orchestration/container/state paths remain outside the MVP execution path;
+retirement is M3. No prototype or operational state was used for tests.
 
-## Evidence and limitations
+## Evidence and limits
 
-PROGRESS.md records exact final validation. Default tests require no accounts; new
-integration tests perform real local commits/pushes with fake Codex/GitHub. Installed
-CLI flags/features were inspected, but no real model call or GitHub publication /
-protection change was performed. Existing M4 live findings remain historical evidence,
-not a live acceptance claim for this new loop. No services were installed.
+PROGRESS.md records installation, exact final test results and checks. New tests
+use owned DisposableRoot directories, real local commits/bare-remote pushes and
+fake GitHub/Codex. They exercise new/existing repositories, idempotency, identity,
+stronger-protection preservation, origin/branch conflicts, permission/plan failures,
+read-back failure, setup interruption/lost responses, and setup followed by run
+with unchanged main. No live GitHub repository/protection was created or modified,
+no real Codex session ran, and no push/merge/service deployment of this runner occurred.
 
-Run requires a clean dev branch matching its remote, matching local/remote main,
-root documents, unambiguous GitHub origin, local noreply identity and compatible
-branch-protection evidence. On failure it retains files/checkpoint; on manual rerun
-it resumes implementation or reconciles the recorded commit/push before another task.
-Unsafe branch/config/control changes and unrelated commits stop for human review.
-There is no reset/clean/rebase/force push or automatic merge. Captured failing command
-output is private in `.git/ralph/last-failure.stdout` and `last-failure.stderr`.
+GitHub authentication must also work for Git transport. Setup requires admin rights
+and a plan supporting private-repository branch protection. If initial main is
+published and protection fails, setup remains incomplete; fix access/plan and rerun
+setup before run. Rulesets-only protection is unsupported. Setup never weakens an
+existing policy; incompatible policies require a human to strengthen them while
+preserving additional settings. Existing Git must be on main/dev; unborn Git must
+be on main. Different local/remote baselines are not fetched/reconciled implicitly.
 
-The trusted Ubuntu VM is the execution boundary; do not add a Codex sandbox or claim
-hostile-code isolation. Runtime checks and GitHub protection are independent of
-prompts, but unsandboxed trusted-account code retains that account's privileges.
-Rulesets-only protection and remote CI polling are outside current support.
+The VM/account is trusted and unsandboxed; this does not isolate malicious code.
+Keep the reference checkout and `/home/ilan/agentic-runner-data` out of fixtures.
+Tool-session filesystem restrictions are separate from runner Codex's unsandboxed
+execution. Development `.git` mutations may need tool escalation.
 
-## Next fresh session: M2 only
+## Next fresh session: M3 only
 
-Implement the separate setup command from revised ROADMAP.md. Reuse the project
-configuration and Git boundary; keep main initialization/protection writes out of
-run. Cover new/existing repositories, local GitHub noreply identity, private origin
-creation/connection, main baseline and read-back protection, safe dev branch switch,
-idempotency/conflicts and interrupted setup. Never silently overwrite a remote or
-branch or weaken protection. Missing GitHub plan/permission support is a clear blocker.
-Then run tests, update roadmap/progress/handoff, commit on dev and stop.
-
-Use generated owned fixtures. `/home/ilan/agentic-workspaces/milestone-test` stays
-read-only; `/home/ilan/agentic-runner-data` remains operational state, never a fixture.
-Standing authorization for necessary disposable tests persists. Managed tool-session
-filesystem permissions still apply: `.git` writes in this session required escalation
-because its mount is read-only inside the tool sandbox. That is separate from the
-runner's explicitly unsandboxed Codex launch.
+Audit agent/verification/completion/commit/push interruption and lost responses;
+add focused recovery acceptance and a practical operator guide. Selectively run
+real Codex and disposable protected GitHub acceptance when available, labeling
+actual evidence and environmental limits. Retire obsolete prototype entry points,
+unused orchestration/container/state code and obsolete tests/docs while preserving
+useful helpers/tests and historical evidence. Finish new-operator instructions.
+Run retained tests, update roadmap/progress/handoff, commit on dev, and stop.

@@ -23,6 +23,8 @@ class CliTests(unittest.TestCase):
             for command, arguments, expected, code in (
                 ([str(executable)], [], "Run verified milestones on a development branch", 0),
                 ([str(executable)], ["--help"], "--version", 0),
+                ([str(executable)], ["setup", "--help"], "--config", 0),
+                ([str(executable)], ["setup"], "--config", 2),
                 ([str(executable)], ["--version"], f"agentic-runner {__version__}", 0),
                 ([sys.executable, "-m", "agentic_runner"], ["--version"], f"agentic-runner {__version__}", 0),
                 ([str(executable)], ["start", "--project", "/home/ilan/agentic-workspaces/milestone-test"], "invalid choice", 2),

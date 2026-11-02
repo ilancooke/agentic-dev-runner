@@ -7,8 +7,8 @@ subagents, database or scheduler. See [specification](SPEC.md),
 [architecture and component review](ARCHITECTURE.md), [roadmap](ROADMAP.md), and
 [current handoff](HANDOFF.md).
 
-Revised M1 provides the loop for **already prepared, protected repositories**.
-M2 will add separate one-time setup. M3 covers final recovery/live acceptance and
+Revised M1 provides the loop; M2 adds separate one-time Git/GitHub setup.
+M3 covers final recovery/live acceptance and
 retirement of obsolete paths. The existing prototype and older library APIs are
 preserved for now and are not invoked by run.
 
@@ -29,7 +29,7 @@ fixtures, real local Git and fake Codex/GitHub responses; they consume no model 
 GitHub account. The eight optional native/container checks keep their existing skips.
 [Historical testing instructions](docs/TESTING.md) describe those checks.
 
-## Run a prepared project
+## Configure and set up a project
 
 Copy [project.example.toml](project.example.toml) to a runner-owned location and set
 `name` (GitHub owner/repository), `repository`, `development_branch` and `verification`.
@@ -37,8 +37,51 @@ Relative repository paths resolve from the config file. Verification is a nonemp
 list of literal argv arrays, executed without a shell. Provision dependencies in
 advance and use exact executable paths when needed.
 
-The project must already have nonempty root AGENTS.md, SPEC.md, ARCHITECTURE.md,
-ROADMAP.md and PROGRESS.md; a clean Git checkout on dev; matching local/remote main
+Create nonempty root AGENTS.md, SPEC.md, ARCHITECTURE.md, ROADMAP.md and PROGRESS.md
+in the project directory. For a new project, setup initializes Git and commits all
+unignored files as the initial main baseline; review files and `.gitignore` first.
+Keep the runner config outside the checkout when practical. With existing history,
+setup requires a clean checkout on main or the configured dev branch; commit intended
+document changes yourself before setup. Other branches, detached HEAD, worktrees,
+ambiguous origins and conflicting histories require manual resolution.
+
+```sh
+.venv-dev/bin/agentic-runner setup --config /path/to/project.toml
+```
+
+Setup creates a **private** GitHub repository when origin and the named repository
+are absent, or connects an existing matching repository. It never replaces an
+origin, changes repository visibility, or replaces existing branch history. It
+sets only repository-local identity to the authenticated GitHub login and
+`ID+LOGIN@users.noreply.github.com`. Authentication must also support Git transport;
+for HTTPS, configure `gh auth setup-git` or your chosen credential helper beforehand.
+
+Setup establishes local/remote main only when missing, requiring an identical
+baseline when both exist. An existing remote with history but no main must be
+prepared manually. Existing dev must descend from main; its remote must match it.
+After protecting main, setup creates or switches to dev and publishes its initial
+ref explicitly. Setup does not launch Codex or verification; launch run separately.
+
+Creating protection requires repository administration rights and a GitHub plan
+that supports protection for that repository. Private repositories require a
+compatible paid plan. Setup creates missing protection with PR review required,
+administrators included, empty bypass allowances and force pushes/deletions
+disabled. It reads protection back before dev publication. Existing compliant
+protection, including additional checks/review rules, is left untouched. An
+incompatible existing policy stops setup: strengthen it manually while preserving
+other rules, then rerun. See [GitHub protection permissions and plan support](https://docs.github.com/en/rest/branches/branch-protection).
+
+An interruption or permission/plan failure preserves files, refs and
+`.git/ralph/setup.json`. Fix the issue and rerun the same setup command; it reconciles
+its recorded baseline and publication without duplicate reachable commits. It may
+have published the initial main before protection fails; this is incomplete setup,
+and run must wait for successful protection. Do not delete setup state to bypass
+changed-file/config/document/branch guards. Setup shares the run lock and refuses
+to operate after a run checkpoint exists; use run recovery then.
+
+## Run a prepared project
+
+Run requires a clean Git checkout on dev; matching local/remote main
 baselines; an origin URL matching the configured GitHub name; a local GitHub noreply
 identity; and dev HEAD matching its remote. The existing
 [roadmap grammar](docs/DISCOVERY.md) defines the two-column progress table and
@@ -49,7 +92,7 @@ Main protection must require PRs, enforce administrators, have no PR bypass
 allowances, and prohibit force pushes/deletions. The runner reads it before work
 and publication and stops if unavailable. Rulesets alone are not currently
 supported; a compatible branch-protection rule is required. Run never changes
-protection or establishes main. M2 will automate setup separately.
+protection or establishes main. Only the separate setup command performs those writes.
 
 ```sh
 .venv-dev/bin/agentic-runner run --config /path/to/project.toml
@@ -82,8 +125,8 @@ writes are unsafe, only the checkpoint records the failure.
 
 The trusted VM/account is the execution boundary. Unsandboxed code can access that
 account; runner checks and GitHub protection do not provide hostile-code isolation.
-No main updates, merges, live publication of this runner or persistent services
-were performed during M1 development.
+Development acceptance uses local bare remotes and fake GitHub/Codex; live protected
+GitHub and Codex acceptance remains M3 work. This runner has not been pushed or merged.
 
 `discover /path/to/checkout` remains available for read-only historical discovery.
 Do not execute root prototype scripts or use the reference/operational directories

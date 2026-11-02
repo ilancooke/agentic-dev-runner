@@ -3,7 +3,6 @@
 import json
 import os
 import stat
-from pathlib import Path
 
 from .project import check_process, fingerprint, require
 from .repository import Repository
@@ -18,38 +17,71 @@ def environment():
     return env
 
 
-class GitBoundary:
+def local_config(root):
+    config = Repository(root).config
+    require(not any(k.startswith(("filter.", "extensions.")) or k in
+                    {"core.sshcommand", "core.gitproxy", "core.worktree"} for k in config),
+            "Unsupported Git filters/extensions/command overrides; resolve local config first.")
+    return config
+
+
+def origin_url(project, config, *, optional=False):
+    urls = config.get("remote.origin.url", [])
+    if optional and not any(k.startswith("remote.origin.") for k in config):
+        return None
+    require(len(urls) == 1 and config.get("remote.origin.pushurl", urls) == urls,
+            "Origin must have one identical fetch/push URL.")
+    name = project.name
+    require(urls[0] in {f"https://github.com/{name}", f"https://github.com/{name}.git", f"git@github.com:{name}.git"},
+            "Origin does not match the configured GitHub project.")
+    require(config.get("remote.origin.mirror", ["false"]) == ["false"], "Mirrored origin is unsupported.")
+    return urls[0]
+
+
+def validate_protection(value):
+    require(isinstance(value, dict), "GitHub did not return a protection object.")
+    reviews = value.get("required_pull_request_reviews")
+    require(isinstance(value.get("enforce_admins"), dict) and value["enforce_admins"].get("enabled") is True and isinstance(reviews, dict),
+            "Main protection must require pull requests and enforce administrators; run setup or fix protection.")
+    bypass = reviews.get("bypass_pull_request_allowances", {})
+    require(isinstance(bypass, dict) and not any(bypass.values()), "Main protection has PR bypass allowances.")
+    require(all(isinstance(value.get(k), dict) and value[k].get("enabled") is False for k in ("allow_force_pushes", "allow_deletions")),
+            "Main must prohibit force pushes and deletion.")
+
+
+class GitCommands:
+    def call(self, argv, *, timeout=60):
+        result = self.process(list(argv), cwd=self.root, env=self.env, timeout=timeout)
+        check_process(result, f"Command failed: {argv[0]} {argv[1]}")
+        return result.stdout.decode()
+
+    def git(self, *argv, strip=True):
+        output = self.call(["git", "--literal-pathspecs", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false",
+                            "-c", "commit.gpgsign=false", "-c", "core.attributesFile=/dev/null", *argv])
+        return output.rstrip("\n") if strip else output
+
+    def head(self):
+        return self.git("rev-parse", "HEAD")
+
+    def remote_ref(self, branch):
+        text = self.git("ls-remote", "--refs", self.url, f"refs/heads/{branch}")
+        rows = text.splitlines()
+        require(len(rows) <= 1, "Ambiguous remote ref.")
+        return rows[0].split()[0] if rows else None
+
+
+class GitBoundary(GitCommands):
     def __init__(self, project, *, process=supervise, env=None):
         self.project, self.process = project, process
         self.root = project.repository
         self.env = environment() if env is None else env
         require(os.getuid() != 0 and self.root.stat().st_uid == os.getuid(), "Run as the non-root checkout owner.")
         require((self.root / ".git").is_dir() and not (self.root / ".git").is_symlink(), "Run requires an ordinary prepared Git checkout; run setup first.")
-        repository = Repository(self.root)
-        config = repository.config
-        require(not any(k.startswith(("filter.", "extensions.")) or k in {"core.sshcommand", "core.gitproxy", "core.worktree"} for k in config),
-                "Unsupported Git filters/extensions/command overrides; resolve local config first.")
-        urls = config.get("remote.origin.url", [])
-        require(len(urls) == 1 and config.get("remote.origin.pushurl", urls) == urls, "Origin must have one identical fetch/push URL.")
-        name = project.name
-        require(urls[0] in {f"https://github.com/{name}", f"https://github.com/{name}.git", f"git@github.com:{name}.git"}, "Origin does not match the configured GitHub project.")
-        require(config.get("remote.origin.mirror", ["false"]) == ["false"], "Mirrored origin is unsupported.")
-        self.url = urls[0]
+        config = local_config(self.root)
+        self.url = origin_url(project, config)
         self.config_hash = fingerprint((self.root / ".git/config").read_bytes())
         require(config.get("user.name", [""])[0].strip() and
                 config.get("user.email", [""])[0].endswith("@users.noreply.github.com"), "Configure a repository-local GitHub noreply identity with setup first.")
-
-    def call(self, argv, *, timeout=60):
-        result = self.process(list(argv), cwd=self.root, env=self.env, timeout=timeout)
-        check_process(result, f"Command failed: {argv[0]} {argv[1]}")
-        return result.stdout.decode()
-
-    def git(self, *argv):
-        return self.call(["git", "--literal-pathspecs", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false",
-                          "-c", "commit.gpgsign=false", "-c", "core.attributesFile=/dev/null", *argv]).rstrip("\n")
-
-    def head(self):
-        return self.git("rev-parse", "HEAD")
 
     def guard(self, main=None, head=None):
         require(self.git("symbolic-ref", "--quiet", "HEAD") == f"refs/heads/{self.project.development_branch}", "Wrong branch: switch to the configured development branch manually; main is forbidden.")
@@ -59,21 +91,9 @@ class GitBoundary:
         if head:
             require(self.head() == head, "Unexpected HEAD change; Codex and checks must perform no Git operations.")
 
-    def remote_ref(self, branch):
-        text = self.git("ls-remote", "--refs", self.url, f"refs/heads/{branch}")
-        rows = text.splitlines()
-        require(len(rows) <= 1, "Ambiguous remote ref.")
-        return rows[0].split()[0] if rows else None
-
     def protection(self):
         value = json.loads(self.call(["gh", "api", "--hostname", "github.com", f"repos/{self.project.name}/branches/main/protection"]))
-        require(isinstance(value, dict), "GitHub did not return a protection object.")
-        reviews = value.get("required_pull_request_reviews")
-        require(isinstance(value.get("enforce_admins"), dict) and value["enforce_admins"].get("enabled") is True and isinstance(reviews, dict),
-                "Main protection must require pull requests and enforce administrators; run setup or fix protection.")
-        bypass = reviews.get("bypass_pull_request_allowances", {})
-        require(isinstance(bypass, dict) and not any(bypass.values()), "Main protection has PR bypass allowances.")
-        require(all(isinstance(value.get(k), dict) and value[k].get("enabled") is False for k in ("allow_force_pushes", "allow_deletions")), "Main must prohibit force pushes and deletion.")
+        validate_protection(value)
 
     def remote_guard(self, main):
         self.protection()
